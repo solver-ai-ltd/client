@@ -1,0 +1,3 @@
+token=REPLACEWITHSOLVERAITOKENHERE
+datamanagerUrl=https://datamanagerapi.solver-ai.com
+computerUrl=https://computer.solver-ai.com
