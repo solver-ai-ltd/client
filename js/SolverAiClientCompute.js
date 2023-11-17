@@ -33,7 +33,7 @@ class SolverAiClientCompute {
 
     async runSolver(inputJson) {
         try {
-            const url = `${this.__base_url_Computer}solve_website/`;
+            const url = `${this.__base_url_Computer}solvejson/`;
             const response = await axios.post(url, inputJson, { headers: this.__headers });
             
             if (this.constructor.__isStatusCodeOk(response.status)) {

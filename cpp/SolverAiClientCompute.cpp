@@ -69,7 +69,7 @@ nlohmann::json SolverAiClientCompute::getProblemSetup() {
 nlohmann::json SolverAiClientCompute::runSolver(nlohmann::json data) {
     CURL *curl;
     CURLcode res;
-    std::string url = this->__base_url_Computer +"solve_website/";
+    std::string url = this->__base_url_Computer +"solvejson/";
     std::string response_string;
     long response_code;
 

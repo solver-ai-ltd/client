@@ -33,7 +33,7 @@ class SolverAiClientCompute:
     def runSolver(self, inputJson: dict) -> dict:
         headers = self.__headers.copy()
         headers["Content-Type"] = "application/json"
-        url = f'{self.__base_url_Computer}solve_website/'
+        url = f'{self.__base_url_Computer}solvejson/'
         jsonData = json.dumps(inputJson)
         response = requests.post(url, headers=headers, data=jsonData)
         if self.__isStatusCodeOk(response):
