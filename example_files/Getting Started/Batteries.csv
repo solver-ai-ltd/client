@@ -1,0 +1,6 @@
+battery_model,battery_capacity,battery_efficiency,battery_price,voltage_compatibility
+Battery1,50,0.9,5000,High Voltage
+Battery2,75,0.92,7500,Low Voltage
+Battery3,100,0.95,10000,High Voltage
+Battery4,125,0.88,12500,Low Voltage
+Battery5,150,0.9,15000,High Voltage

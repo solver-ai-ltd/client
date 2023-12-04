@@ -1,0 +1,6 @@
+motor_model,motor_power,motor_efficiency,motor_price,voltage_compatibility
+Motor1,100,0.85,1000,High Voltage
+Motor2,150,0.9,1500,Low Voltage
+Motor3,200,0.95,2000,High Voltage
+Motor4,250,0.8,2500,Low Voltage
+Motor5,300,0.85,3000,High Voltage

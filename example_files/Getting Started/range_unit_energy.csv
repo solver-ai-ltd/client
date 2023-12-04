@@ -1,0 +1,4 @@
+motor_power,battery_capacity,body_weight,range_unit_energy
+100,50,1500,3.4
+150,75,1400,3.6
+200,100,1300,3.8
