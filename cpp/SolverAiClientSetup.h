@@ -25,6 +25,14 @@ public:
         std::string vectorizationIndices = ""
     );
 
+    int patchEquation(
+        int id,
+        std::string name = "",
+        std::string equationString = "",
+        std::string variablesString = "",
+        std::string vectorizationIndices = ""
+    );
+
     int postCode(
         std::string name,
         std::string filePath,
@@ -33,9 +41,25 @@ public:
         std::string vectorizationIndices = ""
     );
 
+    int patchCode(
+        int id,
+        std::string name = "",
+        std::string filePath = "",
+        std::string variablesStringIn = "",
+        std::string variablesStringOut = "",
+        std::string vectorizationIndices = ""
+    );
+
     int postHardData(
         std::string name,
         std::string filePath,
+        std::string vectorizationIndices = ""
+    );
+
+    int patchHardData(
+        int id,
+        std::string name = "",
+        std::string filePath = "",
         std::string vectorizationIndices = ""
     );
 
@@ -47,6 +71,15 @@ public:
         std::string vectorizationIndices = ""
     );
 
+    int patchSoftData(
+        int id,
+        std::string name = "",
+        std::string filePath = "",
+        std::string variablesStringIn = "",
+        std::string variablesStringOut = "",
+        std::string vectorizationIndices = ""
+    );
+
     int postProblem(
         std::string problemName,
         std::vector<int> equationIds = {},
@@ -55,14 +88,13 @@ public:
         std::vector<int> softIds = {}
     );
 
-    void patchHardData(
+    int patchProblem(
         int id,
-        std::string filePath
-    );
-
-    void patchSoftData(
-        int id,
-        std::string filePath
+        std::string problemName = "",
+        std::vector<int> equationIds = {},
+        std::vector<int> codeIds = {},
+        std::vector<int> hardIds = {},
+        std::vector<int> softIds = {}
     );
 
     static size_t writeCallback(void* contents, size_t size, size_t nmemb, std::string* userp);
@@ -70,18 +102,12 @@ public:
 private:
     bool isStatusCodeOk(int statusCode);
 
-    int post(
+    int postPatch(
         std::string urlSuffix,
         nlohmann::json jsonData,
         std::string filePath = "",
-        std::string fileKey = ""
-    );
-
-    void patchFile(
-        std::string urlSuffix,
-        int id,
-        std::string filePath,
-        std::string fileKey
+        std::string fileKey = "",
+        int id = -1
     );
 
     void deleteIds(

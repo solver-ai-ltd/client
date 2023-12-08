@@ -92,7 +92,9 @@ int main() {
 
         solverAiClientSetup.patchHardData(
             id,
-            (std::filesystem::path(data_file_folder_path) / "hard_data_basic_1_mod.csv").string()
+            "",
+            (std::filesystem::path(data_file_folder_path) / "hard_data_basic_1_mod.csv").string(),
+            ""
         );
 
         results = solverAiClientCompute.runSolver(inputJson);

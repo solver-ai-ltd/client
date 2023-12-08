@@ -26,13 +26,12 @@ int main() {
     int problem_id = -1;
 
     try {
-        int id = solverAiClientSetup.postCode(
-            "code_basic",
-            (std::filesystem::path(data_file_folder_path) / "code_basic.py").string(),
-            "x1, x2",
-            "y1, y2"
+        int id = solverAiClientSetup.postEquation(
+            "test equation",
+            "y = x",
+            "x"
         );
-        code_ids.push_back(id);
+        equation_ids.push_back(id);
 
         problem_id = solverAiClientSetup.postProblem(
             "Test Problem",
@@ -48,8 +47,8 @@ int main() {
 
         nlohmann::json expectedProblemSetupJson = {
             {"id", problem_id},
-            {"inputs", {"x1", "x2"}},
-            {"outputs", {"y1", "y2"}}
+            {"inputs", {"x"}},
+            {"outputs", {"y"}}
         };
 
         if (problemSetupJson != expectedProblemSetupJson) {
@@ -59,15 +58,7 @@ int main() {
         nlohmann::json inputJson = {
             {"id", problem_id},
             {"inputs", {
-                {"x1",
-                    {
-                        {"Min", -2},
-                        {"Max", 2},
-                        {"Constant", 0},
-                        {"Integer", 0}
-                    }
-                },
-                {"x2",
+                {"x",
                     {
                         {"Min", -2},
                         {"Max", 2},
@@ -77,7 +68,7 @@ int main() {
                 }
             }},
             {"constraints", {
-                {"y1",
+                {"y",
                     {
                         {"Operation", "greater than"},
                         {"Value1", 1},
@@ -92,15 +83,7 @@ int main() {
                 }
             }},
             {"objectives", {
-                {"y1",
-                    {
-                        {"Operation", "minimize"}
-                        // Operation options are:
-                        // - 'minimize'
-                        // - 'maximize'
-                    }
-                },
-                {"y2",
+                {"y",
                     {
                         {"Operation", "minimize"}
                         // Operation options are:
@@ -120,21 +103,41 @@ int main() {
         // results should have value similar to
         // {
         //     {"Number Of Results", 1},
-        //     {"Objective Variable Names", "['y1', 'y2']"},
-        //     {"F0", "[ 1. -2.]"},
-        //     {"Constraint Variable Names ", "['y1']"},
+        //     {"Objective Variable Names", "['y']"},
+        //     {"F0", "[1.]"},
+        //     {"Constraint Variable Names ", "['y']"},
         //     {"G0", "[1.]"},
-        //     {"Input Variable Names", "['x1', 'x2']"},
-        //     {"X0", "[1.0000000000000004, -2.0]"},
-        //     {"Output Variable Names", "['y1', 'y2']"},
-        //     {"Y0", "[1.0000000000000004, -2.0]"}
+        //     {"Input Variable Names", "['x']"},
+        //     {"X0", "[1.0000000000200555]"},
+        //     {"Output Variable Names", "['y']"},
+        //     {"Y0", "[1.0000000000200555]"}
         // };
+
+        solverAiClientSetup.patchEquation(
+            equation_ids[0],
+            "",
+            "y1 = x1",
+            "x1",
+            ""
+        );
+
+        problemSetupJson = solverAiClientCompute.getProblemSetup();
+
+        expectedProblemSetupJson = {
+            {"id", problem_id},
+            {"inputs", {"x1"}},
+            {"outputs", {"y1"}}
+        };
+
+        if (problemSetupJson != expectedProblemSetupJson) {
+            throw std::runtime_error("Problem Setup JSON does not match expected value.");
+        }
 
         std::cout << "Test was successful!!!" << std::endl;
 
         solverAiClientSetup.deleteAll(equation_ids, code_ids, hard_data_ids, soft_data_ids, problem_id);
     } catch (std::exception& e) {
-        std::cerr << "Exception: " << e.what() << std::endl;
+        std::cerr << e.what() << std::endl;
 
         solverAiClientSetup.deleteAll(equation_ids, code_ids, hard_data_ids, soft_data_ids, problem_id);
     }

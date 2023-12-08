@@ -26,12 +26,13 @@ int main() {
     int problem_id = -1;
 
     try {
-        int id = solverAiClientSetup.postEquation(
-            "test equation",
-            "y = x",
-            "x"
+        int id = solverAiClientSetup.postCode(
+            "code_basic",
+            (std::filesystem::path(data_file_folder_path) / "code_basic.py").string(),
+            "x1, x2",
+            "y1, y2"
         );
-        equation_ids.push_back(id);
+        code_ids.push_back(id);
 
         problem_id = solverAiClientSetup.postProblem(
             "Test Problem",
@@ -47,8 +48,8 @@ int main() {
 
         nlohmann::json expectedProblemSetupJson = {
             {"id", problem_id},
-            {"inputs", {"x"}},
-            {"outputs", {"y"}}
+            {"inputs", {"x1", "x2"}},
+            {"outputs", {"y1", "y2"}}
         };
 
         if (problemSetupJson != expectedProblemSetupJson) {
@@ -58,7 +59,15 @@ int main() {
         nlohmann::json inputJson = {
             {"id", problem_id},
             {"inputs", {
-                {"x",
+                {"x1",
+                    {
+                        {"Min", -2},
+                        {"Max", 2},
+                        {"Constant", 0},
+                        {"Integer", 0}
+                    }
+                },
+                {"x2",
                     {
                         {"Min", -2},
                         {"Max", 2},
@@ -68,7 +77,7 @@ int main() {
                 }
             }},
             {"constraints", {
-                {"y",
+                {"y1",
                     {
                         {"Operation", "greater than"},
                         {"Value1", 1},
@@ -83,7 +92,15 @@ int main() {
                 }
             }},
             {"objectives", {
-                {"y",
+                {"y1",
+                    {
+                        {"Operation", "minimize"}
+                        // Operation options are:
+                        // - 'minimize'
+                        // - 'maximize'
+                    }
+                },
+                {"y2",
                     {
                         {"Operation", "minimize"}
                         // Operation options are:
@@ -103,21 +120,42 @@ int main() {
         // results should have value similar to
         // {
         //     {"Number Of Results", 1},
-        //     {"Objective Variable Names", "['y']"},
-        //     {"F0", "[1.]"},
-        //     {"Constraint Variable Names ", "['y']"},
+        //     {"Objective Variable Names", "['y1', 'y2']"},
+        //     {"F0", "[ 1. -2.]"},
+        //     {"Constraint Variable Names ", "['y1']"},
         //     {"G0", "[1.]"},
-        //     {"Input Variable Names", "['x']"},
-        //     {"X0", "[1.0000000000200555]"},
-        //     {"Output Variable Names", "['y']"},
-        //     {"Y0", "[1.0000000000200555]"}
+        //     {"Input Variable Names", "['x1', 'x2']"},
+        //     {"X0", "[1.0000000000000004, -2.0]"},
+        //     {"Output Variable Names", "['y1', 'y2']"},
+        //     {"Y0", "[1.0000000000000004, -2.0]"}
         // };
+
+        solverAiClientSetup.patchCode(
+            code_ids[0],
+            "",
+            (std::filesystem::path(data_file_folder_path) / "code_basic_mod.py").string(),
+            "",
+            "y1_mod, y2_mod",
+            ""
+        );
+
+        problemSetupJson = solverAiClientCompute.getProblemSetup();
+
+        expectedProblemSetupJson = {
+            {"id", problem_id},
+            {"inputs", {"x1", "x2"}},
+            {"outputs", {"y1_mod", "y2_mod"}}
+        };
+
+        if (problemSetupJson != expectedProblemSetupJson) {
+            throw std::runtime_error("Problem Setup JSON does not match expected value.");
+        }
 
         std::cout << "Test was successful!!!" << std::endl;
 
         solverAiClientSetup.deleteAll(equation_ids, code_ids, hard_data_ids, soft_data_ids, problem_id);
     } catch (std::exception& e) {
-        std::cerr << e.what() << std::endl;
+        std::cerr << "Exception: " << e.what() << std::endl;
 
         solverAiClientSetup.deleteAll(equation_ids, code_ids, hard_data_ids, soft_data_ids, problem_id);
     }
