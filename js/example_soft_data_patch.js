@@ -115,7 +115,11 @@ async function main() {
 
         await solverAiClientSetup.patchSoftData(
             id,
-            `${config.data_file_folder_path}/soft_data_basic_mod.csv`
+            undefined,
+            `${config.data_file_folder_path}/soft_data_basic_mod.csv`,
+            undefined,
+            undefined,
+            undefined
         )
 
         results = await solverAiClientCompute.runSolver(inputJson);

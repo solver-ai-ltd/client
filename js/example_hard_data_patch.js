@@ -83,7 +83,9 @@ async function main() {
 
         solverAiClientSetup.patchHardData(
             id,
-            `${config.data_file_folder_path}/hard_data_basic_1_mod.csv`
+            undefined,
+            `${config.data_file_folder_path}/hard_data_basic_1_mod.csv`,
+            undefined
         )
 
         results = await solverAiClientCompute.runSolver(inputJson);

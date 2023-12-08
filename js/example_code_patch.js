@@ -18,13 +18,13 @@ async function main() {
 
     try {
 
-        const id = await solverAiClientSetup.postSoftData(
-            'soft_data_basic',
-            `${config.data_file_folder_path}/soft_data_basic.csv`,
-            'in1, in2',
-            'out1, out2'
-            )
-        soft_data_ids.push(id);
+        const id = await solverAiClientSetup.postCode(
+            'test code',
+            `${config.data_file_folder_path}/code_basic.py`,
+            'x1, x2',
+            'y1, y2'
+        )
+        code_ids.push(id);
 
         problem_id = await solverAiClientSetup.postProblem(
             'Test Problem',
@@ -36,12 +36,12 @@ async function main() {
 
         const solverAiClientCompute = new SolverAiClientCompute(config.computerUrl, config.token, problem_id);
 
-        const problemSetupJson = await solverAiClientCompute.getProblemSetup();
+        let problemSetupJson = await solverAiClientCompute.getProblemSetup();
 
-        const expectedProblemSetupJson = {
+        let expectedProblemSetupJson = {
             id: problem_id,
-            inputs: ['in1', 'in2'],
-            outputs: ['out1', 'out1_std', 'out2', 'out2_std']
+            inputs: ['x1', 'x2'],
+            outputs: ['y1', 'y2']
         };
 
         if (JSON.stringify(problemSetupJson) !== JSON.stringify(expectedProblemSetupJson)) {
@@ -51,23 +51,23 @@ async function main() {
         const inputJson = {
             id: problem_id,
             inputs: {
-                in1: {
-                    Min: "0",
-                    Max: "3.141592654",
+                x1: {
+                    Min: "-2",
+                    Max: "2",
                     Constant: 0,
                     Integer: 0
                 },
-                in2: {
-                    Min: "0",
-                    Max: "3.141592654",
+                x2: {
+                    Min: "-2",
+                    Max: "2",
                     Constant: 0,
                     Integer: 0
                 }
             },
             constraints: {
-                out1: {
+                y1: {
                     Operation: 'greater than',
-                    Value1: "0.4999999",
+                    Value1: "1",
                     Value2: ""
                     // Operation options are:
                     // - 'smaller than': requires Value1
@@ -78,14 +78,14 @@ async function main() {
                 },
             },
             objectives: {
-                out1: {
+                y1: {
                     Operation: 'minimize'
                     // Operation options are:
                     // - 'minimize'
                     // - 'maximize'
                 },
-                out2: {
-                    Operation: 'minimize'
+                y2: {
+                    Operation: 'maximize'
                     // Operation options are:
                     // - 'minimize'
                     // - 'maximize'
@@ -102,16 +102,35 @@ async function main() {
         // results should have value similar to
         // {
         //     'Number Of Results': 1,
-        //     'Objective Variable Names': "['out1', 'out2']",
-        //     'F0': '[0.4999999001579293, -0.865855861022438]',
-        //     'Constraint Variable Names ': "['out1']",
-        //     'G0': '[0.4999999001579293]',
-        //     'Input Variable Names': "['in1', 'in2']",
-        //     'X0': '[0.5215092495460986, 2.6159045950892796]',
-        //     'Output Variable Names':
-        //         "['out1', 'out1_std', 'out2', 'out2_std']",
-        //     'Y0': '[0.4999999001579293, 0.0016245602954137266, -0.865855861022438, 0.002297475202666934]'
+        //     'Objective Variable Names': "['y1', 'y2']",
+        //     'F0': '[1.0000000000000004, 2.0]',
+        //     'Constraint Variable Names ': "['y1']",
+        //     'G0': '[1.0000000000000004]',
+        //     'Input Variable Names': "['x1', 'x2']",
+        //     'X0': '[1.0000000000000004, 2.0]',
+        //     'Output Variable Names': "['y1', 'y2']",
+        //     'Y0': '[1.0000000000000004, 2.0]'
         // };
+
+        await solverAiClientSetup.patchCode(
+            code_ids[0],
+            undefined,
+            `${config.data_file_folder_path}/code_basic_mod.py`,
+            undefined,
+            'y1_mod, y2_mod'
+        )
+
+        problemSetupJson = await solverAiClientCompute.getProblemSetup();
+
+        expectedProblemSetupJson = {
+            id: problem_id,
+            inputs: ['x1', 'x2'],
+            outputs: ['y1_mod', 'y2_mod']
+        };
+
+        if (JSON.stringify(problemSetupJson) !== JSON.stringify(expectedProblemSetupJson)) {
+            throw new Error('Problem Setup JSON does not match expected value.');
+        }
 
         console.log('Test was successful!!!');
 

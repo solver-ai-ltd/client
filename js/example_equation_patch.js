@@ -35,9 +35,9 @@ async function main() {
 
         const solverAiClientCompute = new SolverAiClientCompute(config.computerUrl, config.token, problem_id);
 
-        const problemSetupJson = await solverAiClientCompute.getProblemSetup();
+        let problemSetupJson = await solverAiClientCompute.getProblemSetup();
 
-        const expectedProblemSetupJson = {
+        let expectedProblemSetupJson = {
             id: problem_id,
             inputs: ['x'],
             outputs: ['y']
@@ -89,6 +89,26 @@ async function main() {
         //     'Output Variable Names': "['y']",
         //     'Y0': '[1.0000000000200555]'
         // };
+
+        await solverAiClientSetup.patchEquation(
+            equation_ids[0],
+            undefined,
+            'y1 = x1',
+            'x1',
+            undefined
+        );
+
+        problemSetupJson = await solverAiClientCompute.getProblemSetup();
+
+        expectedProblemSetupJson = {
+            id: problem_id,
+            inputs: ['x1'],
+            outputs: ['y1']
+        };
+
+        if (!results.hasOwnProperty('Number Of Results') || results['Number Of Results'] < 1) {
+            throw new Error('Results not as expected.');
+        }
 
         console.log('Test was successful!!!');
 
