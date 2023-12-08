@@ -20,27 +20,36 @@ class SolverAiClientSetup:
         self.__softDataSuffix = "soft-datas"
         self.__problemSuffix = "problems"
 
-    def _post(self, urlSuffix, data: dict, files: dict = None):
-        url = f'{self.__base_url_DM}{urlSuffix}/'
+    def _postPatch(self, urlSuffix, data: dict, file: tuple, id=None):
+        isPost = True
+        if id is not None:
+            isPost = False
+
+        if isPost:
+            url = f'{self.__base_url_DM}{urlSuffix}/'
+            httpFunction = requests.post
+        else:
+            url = f'{self.__base_url_DM}{urlSuffix}/{id}/'
+            httpFunction = requests.patch
+
         tempData = data.copy()
         if 'vectorizationIndices' in tempData and \
                 not tempData['vectorizationIndices']:
             tempData.pop('vectorizationIndices')
-        if files is not None:
-            response = requests.post(
-                url, headers=self.__headers, data=tempData, files=files)
+        if file is not None:
+            with open(file[0], 'rb') as fp:
+                response = httpFunction(
+                    url, headers=self.__headers, data=tempData,
+                    files={file[1]: fp}
+                )
         else:  # If no files, convert data to a JSON string
             headers = self.__headers.copy()
             headers["Content-Type"] = "application/json"
             jsonData = json.dumps(tempData)
-            response = requests.post(
-                url, headers=headers, data=jsonData)
-        return self.__processResponse(urlSuffix, response)
+            response = httpFunction(
+                url, headers=headers, data=jsonData
+            )
 
-    def _patchFile(self, urlSuffix, id: int, files: dict = None):
-        url = f'{self.__base_url_DM}{urlSuffix}/{id}/'
-        response = requests.patch(
-            url, headers=self.__headers, files=files)
         return self.__processResponse(urlSuffix, response)
 
     @staticmethod
@@ -103,7 +112,26 @@ class SolverAiClientSetup:
             "variablesString": variablesString,
             "vectorizationIndices": vectorizationIndices
         }
-        return self._post(self.__equationSuffix, data)
+        return self._postPatch(self.__equationSuffix, data, None)
+
+    def patchEquation(
+        self,
+        id: int,
+        name: str = '',
+        equationString: str = '',
+        variablesString: str = '',
+        vectorizationIndices: str = ''
+    ):
+        data = dict()
+        if name:
+            data['name'] = name
+        if equationString:
+            data['equationString'] = equationString
+        if variablesString:
+            data['variablesString'] = variablesString
+        if vectorizationIndices:
+            data['vectorizationIndices'] = vectorizationIndices
+        return self._postPatch(self.__equationSuffix, data, None, id)
 
     def postCode(
         self,
@@ -113,16 +141,37 @@ class SolverAiClientSetup:
         variablesStringOut: str,
         vectorizationIndices: str = ''
     ):
-        with open(filePath, 'rb') as fp:
-            files = {'code': fp}
-            data = {
-                "name": name,
-                "variablesStringIn": variablesStringIn,
-                "variablesStringOut": variablesStringOut,
-                "vectorizationIndices": vectorizationIndices
-            }
-            return self._post(self.__codeSuffix, data, files)
-        return None
+        file = (filePath, 'code')
+        data = {
+            "name": name,
+            "variablesStringIn": variablesStringIn,
+            "variablesStringOut": variablesStringOut,
+            "vectorizationIndices": vectorizationIndices
+        }
+        return self._postPatch(self.__codeSuffix, data, file)
+
+    def patchCode(
+        self,
+        id: int,
+        name: str = '',
+        filePath: str = '',
+        variablesStringIn: str = '',
+        variablesStringOut: str = '',
+        vectorizationIndices: str = ''
+    ):
+        file = None
+        if filePath:
+            file = (filePath, 'code')
+        data = dict()
+        if name:
+            data['name'] = name
+        if variablesStringIn:
+            data['variablesStringIn'] = variablesStringIn
+        if variablesStringOut:
+            data['variablesStringOut'] = variablesStringOut
+        if vectorizationIndices:
+            data['vectorizationIndices'] = vectorizationIndices
+        return self._postPatch(self.__codeSuffix, data, file, id)
 
     def postHardData(
         self,
@@ -130,14 +179,29 @@ class SolverAiClientSetup:
         filePath: str,
         vectorizationIndices: str = ''
     ):
-        with open(filePath, 'rb') as fp:
-            files = {'csv': fp}
-            data = {
-                "name": name,
-                "vectorizationIndices": vectorizationIndices
-            }
-            return self._post(self.__hardDataSuffix, data, files)
-        return None
+        file = (filePath, 'csv')
+        data = {
+            "name": name,
+            "vectorizationIndices": vectorizationIndices
+        }
+        return self._postPatch(self.__hardDataSuffix, data, file)
+
+    def patchHardData(
+        self,
+        id: int,
+        name: str = '',
+        filePath: str = '',
+        vectorizationIndices: str = ''
+    ):
+        file = None
+        if filePath:
+            file = (filePath, 'csv')
+        data = dict()
+        if name:
+            data['name'] = name
+        if vectorizationIndices:
+            data['vectorizationIndices'] = vectorizationIndices
+        return self._postPatch(self.__hardDataSuffix, data, file, id)
 
     def postSoftData(
         self,
@@ -147,36 +211,37 @@ class SolverAiClientSetup:
         variablesStringOut: str,
         vectorizationIndices: str = ''
     ):
-        with open(filePath, 'rb') as fp:
-            files = {'csv': fp}
-            data = {
-                "name": name,
-                "variablesStringIn": variablesStringIn,
-                "variablesStringOut": variablesStringOut,
-                "vectorizationIndices": vectorizationIndices
-            }
-            return self._post(self.__softDataSuffix, data, files)
-        return None
-
-    def patchHardData(
-        self,
-        id: int,
-        filePath: str
-    ):
-        with open(filePath, 'rb') as fp:
-            files = {'csv': fp}
-            return self._patchFile(self.__hardDataSuffix, id, files)
-        return None
+        file = (filePath, 'csv')
+        data = {
+            "name": name,
+            "variablesStringIn": variablesStringIn,
+            "variablesStringOut": variablesStringOut,
+            "vectorizationIndices": vectorizationIndices
+        }
+        return self._postPatch(self.__softDataSuffix, data, file)
 
     def patchSoftData(
         self,
         id: int,
-        filePath: str
+        name: str = '',
+        filePath: str = '',
+        variablesStringIn: str = '',
+        variablesStringOut: str = '',
+        vectorizationIndices: str = ''
     ):
-        with open(filePath, 'rb') as fp:
-            files = {'csv': fp}
-            return self._patchFile(self.__softDataSuffix, id, files)
-        return None
+        file = None
+        if filePath:
+            file = (filePath, 'csv')
+        data = dict()
+        if name:
+            data['name'] = name
+        if variablesStringIn:
+            data['variablesStringIn'] = variablesStringIn
+        if variablesStringOut:
+            data['variablesStringOut'] = variablesStringOut
+        if vectorizationIndices:
+            data['vectorizationIndices'] = vectorizationIndices
+        return self._postPatch(self.__softDataSuffix, data, file, id)
 
     def postProblem(
         self,
@@ -194,4 +259,26 @@ class SolverAiClientSetup:
             "softdatas": softIds,
             "tags": []
         }
-        return self._post(self.__problemSuffix, data)
+        return self._postPatch(self.__problemSuffix, data, None)
+
+    def patchProblem(
+        self,
+        id: int,
+        name: str = '',
+        equationIds=list(),
+        codeIds=list(),
+        hardIds=list(),
+        softIds=list()
+    ):
+        data = dict()
+        if name:
+            data['name'] = name
+        if len(equationIds):
+            data['equations'] = equationIds
+        if len(codeIds):
+            data['codes'] = codeIds
+        if len(hardIds):
+            data['harddatas'] = hardIds
+        if len(softIds):
+            data['softdatas'] = softIds
+        return self._postPatch(self.__problemSuffix, data, None, id)

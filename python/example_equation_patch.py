@@ -1,10 +1,7 @@
-from os import path
-
 from SolverAiClientSetup import SolverAiClientSetup
 from SolverAiClientCompute import SolverAiClientCompute
 
-from setup import token, datamanagerUrl, computerUrl, \
-    data_file_folder_path
+from setup import token, datamanagerUrl, computerUrl
 
 
 def main():
@@ -19,13 +16,12 @@ def main():
 
     try:
 
-        id = solverAiClientSetup.postCode(
-            'code_basic',
-            path.join(data_file_folder_path, 'code_basic.py'),
-            'x1, x2',
-            'y1, y2'
+        id = solverAiClientSetup.postEquation(
+            'test equation',
+            'y = x',
+            'x'
         )
-        code_ids.append(id)
+        equation_ids.append(id)
 
         problem_id = solverAiClientSetup.postProblem(
             'Test Problem',
@@ -42,8 +38,8 @@ def main():
 
         expected_problem_setup_json = {
             'id': problem_id,
-            'inputs': ['x1', 'x2'],
-            'outputs': ['y1', 'y2']
+            'inputs': ['x'],
+            'outputs': ['y']
         }
 
         assert problem_setup_json == expected_problem_setup_json
@@ -51,13 +47,7 @@ def main():
         input_json = {
             "id": problem_id,
             "inputs": {
-                "x1": {
-                    "Min": "-2",
-                    "Max": "2",
-                    "Constant": 0,
-                    "Integer": 0
-                },
-                "x2": {
+                "x": {
                     "Min": "-2",
                     "Max": "2",
                     "Constant": 0,
@@ -65,7 +55,7 @@ def main():
                 }
             },
             "constraints": {
-                "y1": {
+                "y": {
                     "Operation": 'greater than',
                     "Value1": "1",
                     "Value2": ""
@@ -75,17 +65,11 @@ def main():
                     # - 'equal to': requires Value1
                     # - 'inside range': requires Value1 and Value2
                     # - 'outside range': requires Value1 and Value2
-                },
+                }
             },
             "objectives": {
-                "y1": {
+                "y": {
                     "Operation": 'minimize'
-                    # Operation options are:
-                    # - 'minimize'
-                    # - 'maximize'
-                },
-                "y2": {
-                    "Operation": 'maximize'
                     # Operation options are:
                     # - 'minimize'
                     # - 'maximize'
@@ -102,15 +86,32 @@ def main():
         # results should have value similar to
         #     {
         #         'Number Of Results': 1,
-        #         'Objective Variable Names': "['y1', 'y2']",
-        #         'F0': '[0.9999999999999996, 2.0]',
-        #         'Constraint Variable Names ': "['y1']",
+        #         'Objective Variable Names':
+        #         "['y']",
+        #         'F0': '[0.9999999999999996]',
+        #         'Constraint Variable Names ': "['y']",
         #         'G0': '[0.9999999999999996]',
-        #         'Input Variable Names': "['x1', 'x2']",
-        #         'X0': '[0.9999999999999996, 2.0]',
-        #         'Output Variable Names': "['y1', 'y2']",
-        #         'Y0': '[0.9999999999999996, 2.0]'
+        #         'Input Variable Names': "['x']",
+        #         'X0': '[0.9999999999999996]',
+        #         'Output Variable Names': "['y']",
+        #         'Y0': '[0.9999999999999996]'
         #     }
+
+        solverAiClientSetup.patchEquation(
+            equation_ids[0],
+            equationString='y1 = x1',
+            variablesString='x1'
+        )
+
+        problem_setup_json = solverAiClientCompute.getProblemSetup()
+
+        expected_problem_setup_json = {
+            'id': problem_id,
+            'inputs': ['x1'],
+            'outputs': ['y1']
+        }
+
+        assert problem_setup_json == expected_problem_setup_json
 
         print('Test was successful!!!')
 
