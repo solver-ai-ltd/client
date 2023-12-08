@@ -39,25 +39,26 @@ def main():
 
         id = solverAiClientSetup.postSoftData(
             'range_unit_energy_API',
-            path.join(data_file_folder_path, 'getting_started/range_unit_energy.csv'),
+            path.join(data_file_folder_path,
+                      'getting_started/range_unit_energy.csv'),
             'motor_power, battery_capacity, body_weight',
             'range_unit_energy'
         )
         soft_data_ids.append(id)
 
-        id = solverAiClientSetup.postEquation(
-            'total_API',
-            'total_cost = motor_price + battery_n * battery_price * efficiency_price_factor + body_price',
-            'motor_price, battery_price, body_price, efficiency_price_factor, battery_n'
+        id_total_cost = solverAiClientSetup.postEquation(
+            'total_cost_API',
+            'total_cost = motor_price + battery_price * efficiency_price_factor + body_price',
+            'motor_price, battery_price, body_price, efficiency_price_factor'
         )
-        equation_ids.append(id)
+        equation_ids.append(id_total_cost)
 
-        id = solverAiClientSetup.postEquation(
+        id_range = solverAiClientSetup.postEquation(
             'range_API',
-            'range = motor_power * battery_n * battery_capacity * range_unit_energy',
-            'motor_power, battery_capacity, range_unit_energy, battery_n'
+            'range = motor_power * battery_capacity * range_unit_energy',
+            'motor_power, battery_capacity, range_unit_energy'
         )
-        equation_ids.append(id)
+        equation_ids.append(id_range)
 
         id = solverAiClientSetup.postCode(
             'efficiency_price_factor_API',
@@ -68,7 +69,7 @@ def main():
         code_ids.append(id)
 
         problem_id = solverAiClientSetup.postProblem(
-            'Test Problem_API',
+            'Getting Started API',
             equationIds=equation_ids,
             codeIds=code_ids,
             hardIds=hard_data_ids,
@@ -83,12 +84,6 @@ def main():
         input_json = {
             "id": problem_id,
             "inputs": {
-                "battery_n": {
-                    "Min": "-2",
-                    "Max": "2",
-                    "Constant": 0,
-                    "Integer": 0
-                }
             },
             "constraints": {
             },
@@ -128,9 +123,62 @@ def main():
         #         'Y0': "[4.1, 1.2, 2.2, 3.1, 'B', 'H', 'P']"
         #     }
 
-        solverAiClientSetup.postEquation
+        solverAiClientSetup.patchEquation(
+            id_total_cost,
+            equationString='total_cost = motor_price + battery_num * battery_price * efficiency_price_factor + body_price',
+            variablesString='motor_price, battery_price, body_price, efficiency_price_factor, battery_num'
+        )
 
+        solverAiClientSetup.patchEquation(
+            id_range,
+            equationString='range = motor_power * battery_num * battery_capacity * range_unit_energy',
+            variablesString='motor_power, battery_capacity, range_unit_energy, battery_num'
+        )
 
+        input_json = {
+            "id": problem_id,
+            "inputs": {
+                "battery_num": {
+                    "Min": "1",
+                    "Max": "3",
+                    "Constant": 0,
+                    "Integer": 1
+                }
+            },
+            "constraints": {
+                "range": {
+                    "Operation": 'greater than',
+                    "Value1": "200000",
+                    "Value2": ""
+                    # Operation options are:
+                    # - 'smaller than': requires Value1
+                    # - 'greater than': requires Value1
+                    # - 'equal to': requires Value1
+                    # - 'inside range': requires Value1 and Value2
+                    # - 'outside range': requires Value1 and Value2
+                }
+            },
+            "objectives": {
+                "range": {
+                    "Operation": 'maximize'
+                    # Operation options are:
+                    # - 'minimize'
+                    # - 'maximize'
+                },
+                "total_cost": {
+                    "Operation": 'minimize'
+                    # Operation options are:
+                    # - 'minimize'
+                    # - 'maximize'
+                }
+            }
+        }
+
+        results = solverAiClientCompute.runSolver(input_json)
+
+        if 'Number Of Results' not in results \
+                or results['Number Of Results'] < 1:
+            raise Exception('Results not as expected.')
 
         print('Test was successful!!!')
 
