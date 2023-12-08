@@ -103,7 +103,12 @@ class SolverAiClientSetup {
         return errors;
     }
 
-    async postEquation(name, equationString, variablesString, vectorizationIndices = '') {
+    async postEquation(
+        name,
+        equationString,
+        variablesString,
+        vectorizationIndices = ''
+    ) {
         const data = {
             name,
             equationString,
@@ -113,7 +118,12 @@ class SolverAiClientSetup {
         return this._postPatch(this.__equationSuffix, data, null);
     }
 
-    async patchEquation(id, name = '', equationString = '', variablesString = '', vectorizationIndices = '') {
+    async patchEquation(
+        id, name = '',
+        equationString = '',
+        variablesString = '',
+        vectorizationIndices = ''
+    ) {
         const data = {};
         if (name !== '') data.name = name;
         if (equationString !== '') data.equationString = equationString;
@@ -122,7 +132,13 @@ class SolverAiClientSetup {
         return this._postPatch(this.__equationSuffix, data, null, id);
     }
 
-    async postCode(name, filePath, variablesStringIn, variablesStringOut, vectorizationIndices = '') {
+    async postCode(
+        name,
+        filePath,
+        variablesStringIn,
+        variablesStringOut,
+        vectorizationIndices = ''
+    ) {
         const formData = new FormData();
         formData.append('code', fs.readFileSync(filePath, 'binary'),
             {filename: 'code.py'}
@@ -136,7 +152,14 @@ class SolverAiClientSetup {
         return this._postPatch(this.__codeSuffix, data, formData);
     }
 
-    async patchCode(id, name = '', filePath = '', variablesStringIn = '', variablesStringOut = '', vectorizationIndices = '') {
+    async patchCode(
+        id,
+        name = '',
+        filePath = '',
+        variablesStringIn = '',
+        variablesStringOut = '',
+        vectorizationIndices = ''
+    ) {
         let formData = null;
         if (filePath !== '') {
             formData = new FormData();
@@ -152,7 +175,11 @@ class SolverAiClientSetup {
         return this._postPatch(this.__codeSuffix, data, formData, id);
     }
 
-    async postHardData(name, filePath, vectorizationIndices = '') {
+    async postHardData(
+        name,
+        filePath,
+        vectorizationIndices = ''
+    ) {
         const formData = new FormData();
         formData.append('csv', fs.readFileSync(filePath, 'binary'),
             {filename: 'data.csv'}
@@ -164,7 +191,12 @@ class SolverAiClientSetup {
         return this._postPatch(this.__hardDataSuffix, data, formData);
     }
 
-    async patchHardData(id, name = '', filePath = '', vectorizationIndices = '') {
+    async patchHardData(
+        id,
+        name = '',
+        filePath = '',
+        vectorizationIndices = ''
+    ) {
         let formData = null;
         if (filePath !== '') {
             formData = new FormData();
@@ -178,7 +210,13 @@ class SolverAiClientSetup {
         return this._postPatch(this.__hardDataSuffix, data, formData, id);
     }
 
-    async postSoftData(name, filePath, variablesStringIn, variablesStringOut, vectorizationIndices = '') {
+    async postSoftData(
+        name,
+        filePath,
+        variablesStringIn,
+        variablesStringOut,
+        vectorizationIndices = ''
+    ) {
         const formData = new FormData();
         formData.append('csv', fs.readFileSync(filePath, 'binary'),
             {filename: 'data.csv'}
@@ -192,7 +230,13 @@ class SolverAiClientSetup {
         return this._postPatch(this.__softDataSuffix, data, formData);
     }
 
-    async patchSoftData(id, name = '', filePath = '', variablesStringIn = '', variablesStringOut = '', vectorizationIndices = '') {
+    async patchSoftData(
+        id, name = '',
+        filePath = '',
+        variablesStringIn = '',
+        variablesStringOut = '',
+        vectorizationIndices = ''
+    ) {
         let formData = null;
         if (filePath !== '') {
             formData = new FormData();
@@ -220,15 +264,14 @@ class SolverAiClientSetup {
             equations: equationIds,
             codes: codeIds,
             harddatas: hardIds,
-            softdatas: softIds,
-            tags: []
+            softdatas: softIds
         };
         return this._postPatch(this.__problemSuffix, data, null);
     }
 
     async patchProblem(
         id,
-        problemName,
+        problemName = '',
         equationIds = [],
         codeIds = [],
         hardIds = [],
