@@ -116,7 +116,8 @@ def main():
 
         solverAiClientSetup.patchSoftData(
             id,
-            filePath=path.join(data_file_folder_path, 'soft_data_basic_mod.csv')
+            filePath=path.join(data_file_folder_path,
+                               'soft_data_basic_mod.csv')
         )
 
         results = solverAiClientCompute.runSolver(input_json)

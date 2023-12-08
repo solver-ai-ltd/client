@@ -83,7 +83,8 @@ def main():
 
         solverAiClientSetup.patchHardData(
             id,
-            filePath=path.join(data_file_folder_path, 'hard_data_basic_1_mod.csv')
+            filePath=path.join(data_file_folder_path,
+                               'hard_data_basic_1_mod.csv')
         )
 
         results = solverAiClientCompute.runSolver(input_json)
