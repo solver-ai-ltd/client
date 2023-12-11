@@ -5,24 +5,28 @@
 // #include <map>
 
 #include "json.hpp"
-// #include "httplib.h"
+#include "SolverAiComputeInput.h"
+#include "SolverAiComputeResults.h"
 
-class SolverAiClientCompute {
+class SolverAiClientCompute
+{
 public:
     SolverAiClientCompute(std::string computerUrl, std::string token, int problemId);
 
-    nlohmann::json getProblemSetup();
+    void getProblemSetup(
+        std::vector<std::string> &inputs,
+        std::vector<std::string> &outputs
+    );
 
-    nlohmann::json runSolver(nlohmann::json data);
+    SolverAiComputeResults runSolver(const SolverAiComputeInput &input);
 
-    static size_t writeCallback(void* contents, size_t size, size_t nmemb, std::string* userp);
+    static size_t writeCallback(void *contents, size_t size, size_t nmemb, std::string *userp);
 
 private:
     bool isStatusCodeOk(int statusCode);
 
     std::string __base_url_Computer;
     int __problemId;
-    // httplib::Headers __headers;
     std::string __headers;
 };
 

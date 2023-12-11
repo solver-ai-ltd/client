@@ -12,7 +12,7 @@ LIBS = -lcurl
 INCLUDES = -I.
 
 # Common source files
-COMMON_SRCS = SolverAiClientSetup.cpp SolverAiClientCompute.cpp
+COMMON_SRCS = SolverAiClientSetup.cpp SolverAiClientCompute.cpp SolverAiComputeInput.cpp SolverAiComputeResults.cpp
 
 # Object files for common source files
 COMMON_OBJS = $(COMMON_SRCS:.cpp=.o)

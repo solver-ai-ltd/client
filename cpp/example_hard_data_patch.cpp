@@ -5,10 +5,11 @@
 #include <exception>
 #include <filesystem>
 
+#include "SolverAiComputeInput.h"
+#include "SolverAiComputeResults.h"
 #include "SolverAiClientSetup.h"
 #include "SolverAiClientCompute.h"
 
-#include "json.hpp"
 #include "setup.h"
 
 int main() {
@@ -42,53 +43,24 @@ int main() {
 
         SolverAiClientCompute solverAiClientCompute(computerUrl, token, problem_id);
 
-        nlohmann::json problemSetupJson = solverAiClientCompute.getProblemSetup();
+        std::vector<std::string> inputs, outputs;
+        solverAiClientCompute.getProblemSetup(inputs, outputs);
 
-        nlohmann::json expectedProblemSetupJson = {
-            {"id", problem_id},
-            {"inputs", std::vector<std::string>()},
-            {"outputs", {"C1", "T1"}}
-        };
-
-        if (problemSetupJson != expectedProblemSetupJson) {
+        if (
+            inputs != std::vector<std::string>() ||
+            outputs != std::vector<std::string>({"C1", "T1"})
+        ) {
             throw std::runtime_error("Problem Setup JSON does not match expected value.");
         }
 
-        auto noData = std::map<std::string, std::map<std::string, float>>();
-        nlohmann::json inputJson = {
-            {"id", problem_id},
-            {"inputs", noData},
-            {"constraints", noData},
-            {"objectives", {
-                {"T1",
-                    {
-                        {"Operation", "minimize"}
-                        // Operation options are:
-                        // - 'minimize'
-                        // - 'maximize'
-                    }
-                }
-            }}
-        };
+        SolverAiComputeInput input(problem_id);
+        input.addObjective("T1", SolverAiComputeInput::OBJECTIVE::MINIMIZE);
 
-        nlohmann::json results = solverAiClientCompute.runSolver(inputJson);
+        auto results = solverAiClientCompute.runSolver(input);
 
-        if (results.find("Number Of Results") == results.end() || results["Number Of Results"] < 1) {
+        if (results.getNumberOfResults() < 1) {
             throw std::runtime_error("Results not as expected.");
         }
-
-        // results should have value similar to
-        // {
-        //     {"Number Of Results", 1},
-        //     {"Objective Variable Names", "['T1']"},
-        //     {"F0", "[1.]"},
-        //     {"Constraint Variable Names ", "[]"},
-        //     {"G0", "[]"},
-        //     {"Input Variable Names", "[]"},
-        //     {"X0", "[]"},
-        //     {"Output Variable Names", "['C1', 'T1', 'var1', 'var2']"},
-        //     {"Y0", "[4.1, 1.0, 'A', 'G']"}
-        // };
 
         solverAiClientSetup.patchHardData(
             id,
@@ -97,24 +69,11 @@ int main() {
             ""
         );
 
-        results = solverAiClientCompute.runSolver(inputJson);
+        results = solverAiClientCompute.runSolver(input);
 
-        if (results.find("Number Of Results") == results.end() || results["Number Of Results"] < 1) {
+        if (results.getNumberOfResults() < 1) {
             throw std::runtime_error("Results not as expected.");
         }
-
-        // results should have value similar to
-        // {
-        //     {"Number Of Results", 1},
-        //     {"Objective Variable Names", "['T1']"},
-        //     {"F0", "[1.2]"},
-        //     {"Constraint Variable Names ", "[]"},
-        //     {"G0", "[]"},
-        //     {"Input Variable Names", "[]"},
-        //     {"X0", "[]"},
-        //     {"Output Variable Names", "['C1', 'T1', 'var1', 'var2']"},
-        //     {"Y0", "[4.1, 1.2, 'B', 'H']"}
-        // };
 
         std::cout << "Test was successful!!!" << std::endl;
 

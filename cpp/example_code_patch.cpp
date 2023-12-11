@@ -5,10 +5,11 @@
 #include <exception>
 #include <filesystem>
 
+#include "SolverAiComputeInput.h"
+#include "SolverAiComputeResults.h"
 #include "SolverAiClientSetup.h"
 #include "SolverAiClientCompute.h"
 
-#include "json.hpp"
 #include "setup.h"
 
 int main() {
@@ -44,91 +45,28 @@ int main() {
 
         SolverAiClientCompute solverAiClientCompute(computerUrl, token, problem_id);
 
-        nlohmann::json problemSetupJson = solverAiClientCompute.getProblemSetup();
+        std::vector<std::string> inputs, outputs;
+        solverAiClientCompute.getProblemSetup(inputs, outputs);
 
-        nlohmann::json expectedProblemSetupJson = {
-            {"id", problem_id},
-            {"inputs", {"x1", "x2"}},
-            {"outputs", {"y1", "y2"}}
-        };
-
-        if (problemSetupJson != expectedProblemSetupJson) {
+        if (
+            inputs != std::vector<std::string>({"x1", "x2"}) ||
+            outputs != std::vector<std::string>({"y1", "y2"})
+        ) {
             throw std::runtime_error("Problem Setup JSON does not match expected value.");
         }
 
-        nlohmann::json inputJson = {
-            {"id", problem_id},
-            {"inputs", {
-                {"x1",
-                    {
-                        {"Min", -2},
-                        {"Max", 2},
-                        {"Constant", 0},
-                        {"Integer", 0}
-                    }
-                },
-                {"x2",
-                    {
-                        {"Min", -2},
-                        {"Max", 2},
-                        {"Constant", 0},
-                        {"Integer", 0}
-                    }
-                }
-            }},
-            {"constraints", {
-                {"y1",
-                    {
-                        {"Operation", "greater than"},
-                        {"Value1", 1},
-                        {"Value2", 0}
-                        // Operation options are:
-                        // - 'smaller than': requires Value1
-                        // - 'greater than': requires Value1
-                        // - 'equal to': requires Value1
-                        // - 'inside range': requires Value1 and Value2
-                        // - 'outside range': requires Value1 and Value2
-                    }
-                }
-            }},
-            {"objectives", {
-                {"y1",
-                    {
-                        {"Operation", "minimize"}
-                        // Operation options are:
-                        // - 'minimize'
-                        // - 'maximize'
-                    }
-                },
-                {"y2",
-                    {
-                        {"Operation", "minimize"}
-                        // Operation options are:
-                        // - 'minimize'
-                        // - 'maximize'
-                    }
-                }
-            }}
-        };
+        SolverAiComputeInput input(problem_id);
+        input.addInput("x1", -2, 2, false, false);
+        input.addInput("x2", -2, 2, false, false);
+        input.addConstraint("y1", SolverAiComputeInput::CONSTRAINT::GREATER_THAN, 1);
+        input.addObjective("y1", SolverAiComputeInput::OBJECTIVE::MINIMIZE);
+        input.addObjective("y2", SolverAiComputeInput::OBJECTIVE::MINIMIZE);
 
-        nlohmann::json results = solverAiClientCompute.runSolver(inputJson);
+        auto results = solverAiClientCompute.runSolver(input);
 
-        if (results.find("Number Of Results") == results.end() || results["Number Of Results"] < 1) {
+        if (results.getNumberOfResults() < 1) {
             throw std::runtime_error("Results not as expected.");
         }
-
-        // results should have value similar to
-        // {
-        //     {"Number Of Results", 1},
-        //     {"Objective Variable Names", "['y1', 'y2']"},
-        //     {"F0", "[ 1. -2.]"},
-        //     {"Constraint Variable Names ", "['y1']"},
-        //     {"G0", "[1.]"},
-        //     {"Input Variable Names", "['x1', 'x2']"},
-        //     {"X0", "[1.0000000000000004, -2.0]"},
-        //     {"Output Variable Names", "['y1', 'y2']"},
-        //     {"Y0", "[1.0000000000000004, -2.0]"}
-        // };
 
         solverAiClientSetup.patchCode(
             code_ids[0],
@@ -139,15 +77,12 @@ int main() {
             ""
         );
 
-        problemSetupJson = solverAiClientCompute.getProblemSetup();
+        solverAiClientCompute.getProblemSetup(inputs, outputs);
 
-        expectedProblemSetupJson = {
-            {"id", problem_id},
-            {"inputs", {"x1", "x2"}},
-            {"outputs", {"y1_mod", "y2_mod"}}
-        };
-
-        if (problemSetupJson != expectedProblemSetupJson) {
+        if (
+            inputs != std::vector<std::string>({"x1", "x2"}) ||
+            outputs != std::vector<std::string>({"y1_mod", "y2_mod"})
+        ) {
             throw std::runtime_error("Problem Setup JSON does not match expected value.");
         }
 

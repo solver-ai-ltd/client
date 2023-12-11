@@ -10,7 +10,8 @@
 
 #include "SolverAiClientSetup.h"
 
-SolverAiClientSetup::SolverAiClientSetup(std::string datamanagerUrl, std::string token) {
+SolverAiClientSetup::SolverAiClientSetup(std::string datamanagerUrl, std::string token)
+{
     this->__base_url_DM = datamanagerUrl + "/api/data/";
     this->__headers = "Authorization: Token " + token;
     this->__equationSuffix = "equations";
@@ -20,7 +21,8 @@ SolverAiClientSetup::SolverAiClientSetup(std::string datamanagerUrl, std::string
     this->__problemSuffix = "problems";
 }
 
-bool SolverAiClientSetup::isStatusCodeOk(int statusCode) {
+bool SolverAiClientSetup::isStatusCodeOk(int statusCode)
+{
     return 200 <= statusCode && statusCode < 300;
 }
 
@@ -29,8 +31,8 @@ int SolverAiClientSetup::postPatch(
     nlohmann::json data,
     std::string filePath,
     std::string fileKey,
-    int id
-) {
+    int id)
+{
     std::string errors;
 
     bool isPost = (id == -1) ? true : false;
@@ -38,9 +40,12 @@ int SolverAiClientSetup::postPatch(
     CURL *curl;
     CURLcode res;
     std::string url;
-    if (isPost) {
+    if (isPost)
+    {
         url = this->__base_url_DM + urlSuffix + "/";
-    } else {
+    }
+    else
+    {
         url = this->__base_url_DM + urlSuffix + "/" + std::to_string(id) + "/";
     }
     std::string response_string;
@@ -50,11 +55,15 @@ int SolverAiClientSetup::postPatch(
     curl = curl_easy_init();
     struct curl_slist *header_list = NULL;
     struct curl_httppost *formpost = NULL;
-    try {
+    try
+    {
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-        if (isPost) {
+        if (isPost)
+        {
             curl_easy_setopt(curl, CURLOPT_POST, 1L);
-        } else {
+        }
+        else
+        {
             curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
         }
 
@@ -66,16 +75,19 @@ int SolverAiClientSetup::postPatch(
             data.erase("vectorizationIndices");
         }
 
-        if (filePath.empty()) {
+        if (filePath.empty())
+        {
             std::string json_str = data.dump();
             curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, json_str.size());
             curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, json_str.c_str());
 
             header_list = curl_slist_append(header_list, "Content-Type: application/json; charset: utf-8");
         }
-        else {
+        else
+        {
             struct curl_httppost *lastptr = NULL;
-            for (const auto &element : data.items()) {
+            for (const auto &element : data.items())
+            {
                 std::string key = element.key();
                 std::string value = element.value().get<std::string>();
                 curl_formadd(&formpost,
@@ -102,10 +114,14 @@ int SolverAiClientSetup::postPatch(
 
         res = curl_easy_perform(curl);
 
-        if(res != CURLE_OK) {
-            if (isPost) {
+        if (res != CURLE_OK)
+        {
+            if (isPost)
+            {
                 throw std::runtime_error("Post failed");
-            } else {
+            }
+            else
+            {
                 throw std::runtime_error("Patch failed");
             }
         }
@@ -113,12 +129,13 @@ int SolverAiClientSetup::postPatch(
         data = nlohmann::json::parse(response_string);
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
 
-        if(!isStatusCodeOk(response_code))
+        if (!isStatusCodeOk(response_code))
             throw std::runtime_error(response_string);
         else
             id = data["id"].get<int>();
-
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception &e)
+    {
         errors = "Exception: " + std::string(e.what());
     }
 
@@ -128,15 +145,17 @@ int SolverAiClientSetup::postPatch(
     curl_easy_cleanup(curl);
     curl_global_cleanup();
 
-    if (!errors.empty()) {
+    if (!errors.empty())
+    {
         throw std::runtime_error(errors.c_str());
     }
 
     return id;
 }
 
-size_t SolverAiClientSetup::writeCallback(void* contents, size_t size, size_t nmemb, std::string* userp) {
-    ((std::string*)userp)->append((char*)contents, size * nmemb);
+size_t SolverAiClientSetup::writeCallback(void *contents, size_t size, size_t nmemb, std::string *userp)
+{
+    ((std::string *)userp)->append((char *)contents, size * nmemb);
     return size * nmemb;
 }
 
@@ -145,11 +164,13 @@ void SolverAiClientSetup::deleteAll(
     std::vector<int> codeIds,
     std::vector<int> hardIds,
     std::vector<int> softIds,
-    int problemId
-) {
+    int problemId)
+{
     std::string errors;
-    try {
-        if (problemId != -1) {
+    try
+    {
+        if (problemId != -1)
+        {
             // Problem must be deleted first or will not allow deletion of models
             deleteIds(this->__problemSuffix, {problemId}, errors);
         }
@@ -157,15 +178,19 @@ void SolverAiClientSetup::deleteAll(
         deleteIds(this->__codeSuffix, codeIds, errors);
         deleteIds(this->__hardDataSuffix, hardIds, errors);
         deleteIds(this->__softDataSuffix, softIds, errors);
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception &e)
+    {
         std::cerr << "Failed Deleting: " << e.what() << std::endl;
     }
-    if (!errors.empty()) {
+    if (!errors.empty())
+    {
         throw std::runtime_error(errors.c_str());
     }
 }
 
-void SolverAiClientSetup::deleteIds(std::string urlSuffix, std::vector<int> ids, std::string& errors) {
+void SolverAiClientSetup::deleteIds(std::string urlSuffix, std::vector<int> ids, std::string &errors)
+{
     CURL *curl;
     CURLcode res;
     std::string response_string;
@@ -177,8 +202,10 @@ void SolverAiClientSetup::deleteIds(std::string urlSuffix, std::vector<int> ids,
     struct curl_slist *header_list = NULL;
     header_list = curl_slist_append(header_list, this->__headers.c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header_list);
-    for (const int& id : ids) {
-        try {
+    for (const int &id : ids)
+    {
+        try
+        {
             std::string url = this->__base_url_DM + urlSuffix + "/" + std::to_string(id) + "/";
             curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
             curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
@@ -188,17 +215,19 @@ void SolverAiClientSetup::deleteIds(std::string urlSuffix, std::vector<int> ids,
             // curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
             res = curl_easy_perform(curl);
-            
-            if(res != CURLE_OK) {
+
+            if (res != CURLE_OK)
+            {
                 throw std::runtime_error("Post failed");
             }
 
             curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
 
-            if(!isStatusCodeOk(response_code))
+            if (!isStatusCodeOk(response_code))
                 throw std::runtime_error(response_string);
-
-        } catch (const std::exception& e) {
+        }
+        catch (const std::exception &e)
+        {
             errors += "Exception: " + std::string(e.what()) + "\n";
         }
     }
@@ -211,14 +240,13 @@ int SolverAiClientSetup::postEquation(
     std::string name,
     std::string equationString,
     std::string variablesString,
-    std::string vectorizationIndices
-) {
+    std::string vectorizationIndices)
+{
     nlohmann::json data = {
         {"name", name},
         {"equationString", equationString},
         {"variablesString", variablesString},
-        {"vectorizationIndices", vectorizationIndices}
-    };
+        {"vectorizationIndices", vectorizationIndices}};
     return postPatch(this->__equationSuffix, data);
 }
 
@@ -227,13 +255,17 @@ int SolverAiClientSetup::patchEquation(
     std::string name,
     std::string equationString,
     std::string variablesString,
-    std::string vectorizationIndices
-) {
+    std::string vectorizationIndices)
+{
     nlohmann::json data;
-    if (!name.empty()) data["name"] = name;
-    if (!equationString.empty()) data["equationString"] = equationString;
-    if (!variablesString.empty()) data["variablesString"] = variablesString;
-    if (!vectorizationIndices.empty()) data["vectorizationIndices"] = vectorizationIndices;
+    if (!name.empty())
+        data["name"] = name;
+    if (!equationString.empty())
+        data["equationString"] = equationString;
+    if (!variablesString.empty())
+        data["variablesString"] = variablesString;
+    if (!vectorizationIndices.empty())
+        data["vectorizationIndices"] = vectorizationIndices;
     return postPatch(this->__equationSuffix, data, "", "", id);
 }
 
@@ -242,14 +274,13 @@ int SolverAiClientSetup::postCode(
     std::string filePath,
     std::string variablesStringIn,
     std::string variablesStringOut,
-    std::string vectorizationIndices
-) {
+    std::string vectorizationIndices)
+{
     nlohmann::json data = {
         {"name", name},
         {"variablesStringIn", variablesStringIn},
         {"variablesStringOut", variablesStringOut},
-        {"vectorizationIndices", vectorizationIndices}
-    };
+        {"vectorizationIndices", vectorizationIndices}};
     return postPatch(this->__codeSuffix, data, filePath, "code");
 }
 
@@ -259,25 +290,28 @@ int SolverAiClientSetup::patchCode(
     std::string filePath,
     std::string variablesStringIn,
     std::string variablesStringOut,
-    std::string vectorizationIndices
-) {
+    std::string vectorizationIndices)
+{
     nlohmann::json data;
-    if (!name.empty()) data["name"] = name;
-    if (!variablesStringIn.empty()) data["variablesStringIn"] = variablesStringIn;
-    if (!variablesStringOut.empty()) data["variablesStringOut"] = variablesStringOut;
-    if (!vectorizationIndices.empty()) data["vectorizationIndices"] = vectorizationIndices;
+    if (!name.empty())
+        data["name"] = name;
+    if (!variablesStringIn.empty())
+        data["variablesStringIn"] = variablesStringIn;
+    if (!variablesStringOut.empty())
+        data["variablesStringOut"] = variablesStringOut;
+    if (!vectorizationIndices.empty())
+        data["vectorizationIndices"] = vectorizationIndices;
     return postPatch(this->__codeSuffix, data, filePath, "code", id);
 }
 
 int SolverAiClientSetup::postHardData(
     std::string name,
     std::string filePath,
-    std::string vectorizationIndices
-) {
+    std::string vectorizationIndices)
+{
     nlohmann::json data = {
         {"name", name},
-        {"vectorizationIndices", vectorizationIndices}
-    };
+        {"vectorizationIndices", vectorizationIndices}};
     return postPatch(this->__hardDataSuffix, data, filePath, "csv");
 }
 
@@ -285,11 +319,13 @@ int SolverAiClientSetup::patchHardData(
     int id,
     std::string name,
     std::string filePath,
-    std::string vectorizationIndices
-) {
+    std::string vectorizationIndices)
+{
     nlohmann::json data;
-    if (!name.empty()) data["name"] = name;
-    if (!vectorizationIndices.empty()) data["vectorizationIndices"] = vectorizationIndices;
+    if (!name.empty())
+        data["name"] = name;
+    if (!vectorizationIndices.empty())
+        data["vectorizationIndices"] = vectorizationIndices;
     return postPatch(this->__hardDataSuffix, data, filePath, "csv", id);
 }
 
@@ -298,14 +334,13 @@ int SolverAiClientSetup::postSoftData(
     std::string filePath,
     std::string variablesStringIn,
     std::string variablesStringOut,
-    std::string vectorizationIndices
-) {
+    std::string vectorizationIndices)
+{
     nlohmann::json data = {
         {"name", name},
         {"variablesStringIn", variablesStringIn},
         {"variablesStringOut", variablesStringOut},
-        {"vectorizationIndices", vectorizationIndices}
-    };
+        {"vectorizationIndices", vectorizationIndices}};
     return postPatch(this->__softDataSuffix, data, filePath, "csv");
 }
 
@@ -315,13 +350,17 @@ int SolverAiClientSetup::patchSoftData(
     std::string filePath,
     std::string variablesStringIn,
     std::string variablesStringOut,
-    std::string vectorizationIndices
-) {
+    std::string vectorizationIndices)
+{
     nlohmann::json data;
-    if (!name.empty()) data["name"] = name;
-    if (!variablesStringIn.empty()) data["variablesStringIn"] = variablesStringIn;
-    if (!variablesStringOut.empty()) data["variablesStringOut"] = variablesStringOut;
-    if (!vectorizationIndices.empty()) data["vectorizationIndices"] = vectorizationIndices;
+    if (!name.empty())
+        data["name"] = name;
+    if (!variablesStringIn.empty())
+        data["variablesStringIn"] = variablesStringIn;
+    if (!variablesStringOut.empty())
+        data["variablesStringOut"] = variablesStringOut;
+    if (!vectorizationIndices.empty())
+        data["vectorizationIndices"] = vectorizationIndices;
     return postPatch(this->__softDataSuffix, data, filePath, "csv", id);
 }
 
@@ -330,8 +369,8 @@ int SolverAiClientSetup::postProblem(
     std::vector<int> equationIds,
     std::vector<int> codeIds,
     std::vector<int> hardIds,
-    std::vector<int> softIds
-) {
+    std::vector<int> softIds)
+{
     nlohmann::json data = {
         {"name", problemName},
         {"equations", equationIds},
@@ -348,13 +387,18 @@ int SolverAiClientSetup::patchProblem(
     std::vector<int> equationIds,
     std::vector<int> codeIds,
     std::vector<int> hardIds,
-    std::vector<int> softIds
-) {
+    std::vector<int> softIds)
+{
     nlohmann::json data;
-    if (!problemName.empty()) data["name"] = problemName;
-    if (!equationIds.empty()) data["equations"] = equationIds;
-    if (!codeIds.empty()) data["codes"] = codeIds;
-    if (!hardIds.empty()) data["harddatas"] = hardIds;
-    if (!softIds.empty()) data["softdatas"] = softIds;
+    if (!problemName.empty())
+        data["name"] = problemName;
+    if (!equationIds.empty())
+        data["equations"] = equationIds;
+    if (!codeIds.empty())
+        data["codes"] = codeIds;
+    if (!hardIds.empty())
+        data["harddatas"] = hardIds;
+    if (!softIds.empty())
+        data["softdatas"] = softIds;
     return postPatch(this->__problemSuffix, data, "", "", id);
 }

@@ -1,24 +1,33 @@
 #include <iostream>
 #include <string>
 #include <curl/curl.h>
+
 #include "json.hpp"
+
+#include "SolverAiComputeInput.h"
+#include "SolverAiComputeResults.h"
 
 using json = nlohmann::json;
 
 #include "SolverAiClientCompute.h"
 
-SolverAiClientCompute::SolverAiClientCompute(std::string computerUrl, std::string token, int problemId) {
+SolverAiClientCompute::SolverAiClientCompute(std::string computerUrl, std::string token, int problemId)
+{
     this->__base_url_Computer = computerUrl + "/";
     this->__problemId = problemId;
     this->__headers = "Authorization: Token " + token;
 }
 
-bool SolverAiClientCompute::isStatusCodeOk(int statusCode) {
+bool SolverAiClientCompute::isStatusCodeOk(int statusCode)
+{
     return 200 <= statusCode && statusCode < 300;
 }
 
-nlohmann::json SolverAiClientCompute::getProblemSetup() {
-    CURL* curl;
+void SolverAiClientCompute::getProblemSetup(
+    std::vector<std::string> &inputs,
+    std::vector<std::string> &outputs
+) {
+    CURL *curl;
     CURLcode res;
     std::string url = this->__base_url_Computer + "problem_setup/" + std::to_string(this->__problemId);
     std::string response_string;
@@ -27,7 +36,8 @@ nlohmann::json SolverAiClientCompute::getProblemSetup() {
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
     struct curl_slist *header_list = NULL;
-    try {
+    try
+    {
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 
         header_list = curl_slist_append(header_list, this->__headers.c_str());
@@ -42,22 +52,33 @@ nlohmann::json SolverAiClientCompute::getProblemSetup() {
 
         res = curl_easy_perform(curl);
 
-        if(res != CURLE_OK) {
+        if (res != CURLE_OK)
+        {
             throw std::runtime_error("Post failed");
         }
 
         nlohmann::json data = nlohmann::json::parse(response_string);
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
 
-        if(!isStatusCodeOk(response_code))
+        if (!isStatusCodeOk(response_code))
             throw std::runtime_error(response_string);
 
         curl_slist_free_all(header_list);
         curl_easy_cleanup(curl);
         curl_global_cleanup();
 
-        return data;
-    } catch (const std::exception& e) {
+        inputs.clear();
+        for (const auto& input : data["inputs"]) {
+            inputs.push_back(input);
+        }
+
+        outputs.clear();
+        for (const auto& input : data["outputs"]) {
+            outputs.push_back(input);
+        }
+    }
+    catch (const std::exception &e)
+    {
         curl_slist_free_all(header_list);
         curl_easy_cleanup(curl);
         curl_global_cleanup();
@@ -66,17 +87,21 @@ nlohmann::json SolverAiClientCompute::getProblemSetup() {
     }
 }
 
-nlohmann::json SolverAiClientCompute::runSolver(nlohmann::json data) {
+SolverAiComputeResults SolverAiClientCompute::runSolver(const SolverAiComputeInput &input)
+{
+    nlohmann::json data = input.getJson();
+
     CURL *curl;
     CURLcode res;
-    std::string url = this->__base_url_Computer +"solvejson/";
+    std::string url = this->__base_url_Computer + "solvejson/";
     std::string response_string;
     long response_code;
 
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
     struct curl_slist *header_list = NULL;
-    try {
+    try
+    {
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
         curl_easy_setopt(curl, CURLOPT_POST, 1L);
 
@@ -96,24 +121,27 @@ nlohmann::json SolverAiClientCompute::runSolver(nlohmann::json data) {
 
         res = curl_easy_perform(curl);
 
-        if(res != CURLE_OK) {
+        if (res != CURLE_OK)
+        {
             throw std::runtime_error("Post failed");
         }
 
         data = nlohmann::json::parse(response_string);
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
 
-        if(!isStatusCodeOk(response_code))
+        if (!isStatusCodeOk(response_code))
             throw std::runtime_error(response_string);
-        
+
         data = data["results"];
 
         curl_slist_free_all(header_list);
         curl_easy_cleanup(curl);
         curl_global_cleanup();
 
-        return data;
-    } catch (const std::exception& e) {
+        return SolverAiComputeResults(data);
+    }
+    catch (const std::exception &e)
+    {
         curl_slist_free_all(header_list);
         curl_easy_cleanup(curl);
         curl_global_cleanup();
@@ -122,7 +150,8 @@ nlohmann::json SolverAiClientCompute::runSolver(nlohmann::json data) {
     }
 }
 
-size_t SolverAiClientCompute::writeCallback(void* contents, size_t size, size_t nmemb, std::string* userp) {
-    ((std::string*)userp)->append((char*)contents, size * nmemb);
+size_t SolverAiClientCompute::writeCallback(void *contents, size_t size, size_t nmemb, std::string *userp)
+{
+    ((std::string *)userp)->append((char *)contents, size * nmemb);
     return size * nmemb;
 }

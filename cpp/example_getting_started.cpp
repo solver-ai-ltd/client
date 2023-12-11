@@ -5,10 +5,11 @@
 #include <exception>
 #include <filesystem>
 
+#include "SolverAiComputeInput.h"
+#include "SolverAiComputeResults.h"
 #include "SolverAiClientSetup.h"
 #include "SolverAiClientCompute.h"
 
-#include "json.hpp"
 #include "setup.h"
 
 int main() {
@@ -34,7 +35,7 @@ int main() {
 
         id = solverAiClientSetup.postHardData(
             "Bodies_API",
-            (std::filesystem::path(data_file_folder_path) / "/getting_started/Bodies.csv").string()
+            (std::filesystem::path(data_file_folder_path) / "getting_started/Bodies.csv").string()
         );
         hard_data_ids.push_back(id);
 
@@ -84,51 +85,18 @@ int main() {
 
         SolverAiClientCompute solverAiClientCompute(computerUrl, token, problem_id);
 
-        nlohmann::json problemSetupJson = solverAiClientCompute.getProblemSetup();
+        std::vector<std::string> inputs, outputs;
+        solverAiClientCompute.getProblemSetup(inputs, outputs);
 
-        auto noData = std::map<std::string, std::map<std::string, float>>();
-        nlohmann::json inputJson = {
-            {"id", problem_id},
-            {"inputs", noData},
-            {"constraints", noData},
-            {"objectives", {
-                {"range",
-                    {
-                        {"Operation", "maximize"}
-                        // Operation options are:
-                        // - 'minimize'
-                        // - 'maximize'
-                    }
-                },
-                {"total_cost",
-                    {
-                        {"Operation", "minimize"}
-                        // Operation options are:
-                        // - 'minimize'
-                        // - 'maximize'
-                    }
-                }
-            }}
-        };
+        SolverAiComputeInput input(problem_id);
+        input.addObjective("range", SolverAiComputeInput::OBJECTIVE::MAXIMIZE);
+        input.addObjective("total_cost", SolverAiComputeInput::OBJECTIVE::MINIMIZE);
 
-        nlohmann::json results = solverAiClientCompute.runSolver(inputJson);
+        auto results = solverAiClientCompute.runSolver(input);
 
-        if (results.find("Number Of Results") == results.end() || results["Number Of Results"] < 1) {
+        if (results.getNumberOfResults() < 1) {
             throw std::runtime_error("Results not as expected.");
         }
-
-        // results should have value similar to
-        // {
-        //     {"Number Of Results", 1},
-        //     {"Objective Variable Names", "['T1']"},
-        //     {"F0", "[1.]"},
-        //     {"Constraint Variable Names ", "[]"},
-        //     {"G0", "[]"},
-        //     {"Input Variable Names", "[]"},
-        //     {"X0", "[]"},
-        //     {"Output Variable Names", "['C1', 'T1', 'var1', 'var2']"},
-        //     {"Y0", "[4.1, 1.0, 'A', 'G']"}
-        // };
 
         solverAiClientSetup.patchEquation(
             id_total_cost,
@@ -146,53 +114,15 @@ int main() {
             ""
         );
 
-        inputJson = {
-            {"id", problem_id},
-            {"inputs", {
-                {"battery_num",
-                    {
-                        {"Min", 1},
-                        {"Max", 3},
-                        {"Constant", 0},
-                        {"Integer", 1}
-                    }
-                }
-            }},
-            {"constraints", {
-                {"range",
-                    {
-                        {"Operation", "greater than"},
-                        {"Value1", 200000},
-                        {"Value2", 0}
-                        // Operation options are:
-                        // - 'smaller than': requires Value1
-                        // - 'greater than': requires Value1
-                        // - 'equal to': requires Value1
-                        // - 'inside range': requires Value1 and Value2
-                        // - 'outside range': requires Value1 and Value2
-                    }
-                }
-            }},
-            {"objectives", {
-                {"range",
-                    {
-                        {"Operation", "maximize"}
-                        // Operation options are:
-                        // - 'minimize'
-                        // - 'maximize'
-                    }
-                },
-                {"total_cost",
-                    {
-                        {"Operation", "minimize"}
-                    }
-                }
-            }}
-        };
+        SolverAiComputeInput newInput(problem_id);
+        newInput.addInput("battery_num", 1, 3, false, true);
+        newInput.addConstraint("range", SolverAiComputeInput::CONSTRAINT::GREATER_THAN, 200000);
+        newInput.addObjective("range", SolverAiComputeInput::OBJECTIVE::MAXIMIZE);
+        newInput.addObjective("total_cost", SolverAiComputeInput::OBJECTIVE::MINIMIZE);
 
-        results = solverAiClientCompute.runSolver(inputJson);
+        results = solverAiClientCompute.runSolver(newInput);
 
-        if (results.find("Number Of Results") == results.end() || results["Number Of Results"] < 1) {
+        if (results.getNumberOfResults() < 1) {
             throw std::runtime_error("Results not as expected.");
         }
 
