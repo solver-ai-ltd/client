@@ -60,7 +60,7 @@ int main() {
         input.addInput("x2", -2, 2, false, false);
         input.addConstraint("y1", SolverAiComputeInput::CONSTRAINT::GREATER_THAN, 1);
         input.addObjective("y1", SolverAiComputeInput::OBJECTIVE::MINIMIZE);
-        input.addObjective("y2", SolverAiComputeInput::OBJECTIVE::MINIMIZE);
+        input.addObjective("y2", SolverAiComputeInput::OBJECTIVE::MAXIMIZE);
 
         auto results = solverAiClientCompute.runSolver(input);
 
