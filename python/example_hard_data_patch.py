@@ -1,5 +1,7 @@
 from os import path
 
+from SolverAiComputeInput import SolverAiComputeInput, \
+    OBJECTIVE, CONSTRAINT
 from SolverAiClientSetup import SolverAiClientSetup
 from SolverAiClientCompute import SolverAiClientCompute
 
@@ -36,50 +38,19 @@ def main():
         solverAiClientCompute = \
             SolverAiClientCompute(computerUrl, token, problem_id)
 
-        problem_setup_json = solverAiClientCompute.getProblemSetup()
+        inputs, outputs = solverAiClientCompute.getProblemSetup()
 
-        expected_problem_setup_json = {
-            'id': problem_id,
-            'inputs': [],
-            'outputs': ['C1', 'T1']
-        }
+        if inputs != [] or outputs != ['C1', 'T1']:
+            raise \
+                Exception("Problem Setup JSON does not match expected value.")
 
-        assert problem_setup_json == expected_problem_setup_json
+        input = SolverAiComputeInput(problem_id)
+        input.add_objective('T1', OBJECTIVE.MINIMIZE)
 
-        input_json = {
-            "id": problem_id,
-            "inputs": {
-            },
-            "constraints": {
-            },
-            "objectives": {
-                "T1": {
-                    "Operation": 'minimize'
-                    # Operation options are:
-                    # - 'minimize'
-                    # - 'maximize'
-                },
-            }
-        }
+        results = solverAiClientCompute.runSolver(input)
 
-        results = solverAiClientCompute.runSolver(input_json)
-
-        if 'Number Of Results' not in results \
-                or results['Number Of Results'] < 1:
+        if results.get_number_of_results() < 1:
             raise Exception('Results not as expected.')
-
-        # results should have value similar to
-        #     {
-        #         'Number Of Results': 1,
-        #         'Objective Variable Names': "['T1']",
-        #         'F0': '[1.0]',
-        #         'Constraint Variable Names ': "[]",
-        #         'G0': '[]',
-        #         'Input Variable Names': "[]",
-        #         'X0': '[]',
-        #         'Output Variable Names': "['C1', 'T1', 'var1', 'var2']",
-        #         'Y0': "[4.1, 1.0, 'A', 'G']"
-        #     }
 
         solverAiClientSetup.patchHardData(
             id,
@@ -87,24 +58,10 @@ def main():
                                'hard_data_basic_1_mod.csv')
         )
 
-        results = solverAiClientCompute.runSolver(input_json)
+        results = solverAiClientCompute.runSolver(input)
 
-        if 'Number Of Results' not in results \
-                or results['Number Of Results'] < 1:
+        if results.get_number_of_results() < 1:
             raise Exception('Results not as expected.')
-
-        # results should have value similar to
-        #     {
-        #         'Number Of Results': 1,
-        #         'Objective Variable Names': "['T1']",
-        #         'F0': '[1.2]',
-        #         'Constraint Variable Names ': "[]",
-        #         'G0': '[]',
-        #         'Input Variable Names': "[]",
-        #         'X0': '[]',
-        #         'Output Variable Names': "['C1', 'T1', 'var1', 'var2']",
-        #         'Y0': "[4.1, 1.2, 'B', 'H']"
-        #     }
 
         print('Test was successful!!!')
 

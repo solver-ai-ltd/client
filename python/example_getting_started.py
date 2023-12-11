@@ -1,5 +1,7 @@
 from os import path
 
+from SolverAiComputeInput import SolverAiComputeInput, \
+    OBJECTIVE, CONSTRAINT
 from SolverAiClientSetup import SolverAiClientSetup
 from SolverAiClientCompute import SolverAiClientCompute
 
@@ -79,49 +81,16 @@ def main():
         solverAiClientCompute = \
             SolverAiClientCompute(computerUrl, token, problem_id)
 
-        problem_setup_json = solverAiClientCompute.getProblemSetup()
+        inputs, outputs = solverAiClientCompute.getProblemSetup()
 
-        input_json = {
-            "id": problem_id,
-            "inputs": {
-            },
-            "constraints": {
-            },
-            "objectives": {
-                "range": {
-                    "Operation": 'maximize'
-                    # Operation options are:
-                    # - 'minimize'
-                    # - 'maximize'
-                },
-                "total_cost": {
-                    "Operation": 'minimize'
-                    # Operation options are:
-                    # - 'minimize'
-                    # - 'maximize'
-                }
-            }
-        }
+        input = SolverAiComputeInput(problem_id)
+        input.add_objective('range', OBJECTIVE.MAXIMIZE)
+        input.add_objective('total_cost', OBJECTIVE.MINIMIZE)
 
-        results = solverAiClientCompute.runSolver(input_json)
+        results = solverAiClientCompute.runSolver(input)
 
-        if 'Number Of Results' not in results \
-                or results['Number Of Results'] < 1:
+        if results.get_number_of_results() < 1:
             raise Exception('Results not as expected.')
-
-        # results should have value similar to
-        #     {
-        #         'Number Of Results': 1,
-        #         'Objective Variable Names': "['T3']",
-        #         'F0': '[3.1]',
-        #         'Constraint Variable Names ': "[]",
-        #         'G0': '[]',
-        #         'Input Variable Names': "[]",
-        #         'X0': '[]',
-        #         'Output Variable Names':
-        #             "['C1', 'T1', 'T2', 'T3', 'var1', 'var2', 'var3']",
-        #         'Y0': "[4.1, 1.2, 2.2, 3.1, 'B', 'H', 'P']"
-        #     }
 
         solverAiClientSetup.patchEquation(
             id_total_cost,
@@ -135,49 +104,15 @@ def main():
             variablesString='motor_power, battery_capacity, range_unit_energy, battery_num'
         )
 
-        input_json = {
-            "id": problem_id,
-            "inputs": {
-                "battery_num": {
-                    "Min": "1",
-                    "Max": "3",
-                    "Constant": 0,
-                    "Integer": 1
-                }
-            },
-            "constraints": {
-                "range": {
-                    "Operation": 'greater than',
-                    "Value1": "200000",
-                    "Value2": ""
-                    # Operation options are:
-                    # - 'smaller than': requires Value1
-                    # - 'greater than': requires Value1
-                    # - 'equal to': requires Value1
-                    # - 'inside range': requires Value1 and Value2
-                    # - 'outside range': requires Value1 and Value2
-                }
-            },
-            "objectives": {
-                "range": {
-                    "Operation": 'maximize'
-                    # Operation options are:
-                    # - 'minimize'
-                    # - 'maximize'
-                },
-                "total_cost": {
-                    "Operation": 'minimize'
-                    # Operation options are:
-                    # - 'minimize'
-                    # - 'maximize'
-                }
-            }
-        }
+        input = SolverAiComputeInput(problem_id)
+        input.add_input('battery_num', 1, 3, False, True)
+        input.add_constraint('range', CONSTRAINT.GREATER_THAN, 200000)
+        input.add_objective('range', OBJECTIVE.MAXIMIZE)
+        input.add_objective('total_cost', OBJECTIVE.MINIMIZE)
 
-        results = solverAiClientCompute.runSolver(input_json)
+        results = solverAiClientCompute.runSolver(input)
 
-        if 'Number Of Results' not in results \
-                or results['Number Of Results'] < 1:
+        if results.get_number_of_results() < 1:
             raise Exception('Results not as expected.')
 
         print('Test was successful!!!')

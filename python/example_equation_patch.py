@@ -1,3 +1,5 @@
+from SolverAiComputeInput import SolverAiComputeInput, \
+    OBJECTIVE, CONSTRAINT
 from SolverAiClientSetup import SolverAiClientSetup
 from SolverAiClientCompute import SolverAiClientCompute
 
@@ -34,68 +36,21 @@ def main():
         solverAiClientCompute = \
             SolverAiClientCompute(computerUrl, token, problem_id)
 
-        problem_setup_json = solverAiClientCompute.getProblemSetup()
+        inputs, outputs = solverAiClientCompute.getProblemSetup()
 
-        expected_problem_setup_json = {
-            'id': problem_id,
-            'inputs': ['x'],
-            'outputs': ['y']
-        }
+        if inputs != ['x'] or outputs != ['y']:
+            raise \
+                Exception("Problem Setup JSON does not match expected value.")
 
-        assert problem_setup_json == expected_problem_setup_json
+        input = SolverAiComputeInput(problem_id)
+        input.add_input('x', -2, 2, False, False)
+        input.add_constraint('y', CONSTRAINT.GREATER_THAN, 1)
+        input.add_objective('y', OBJECTIVE.MINIMIZE)
 
-        input_json = {
-            "id": problem_id,
-            "inputs": {
-                "x": {
-                    "Min": "-2",
-                    "Max": "2",
-                    "Constant": 0,
-                    "Integer": 0
-                }
-            },
-            "constraints": {
-                "y": {
-                    "Operation": 'greater than',
-                    "Value1": "1",
-                    "Value2": ""
-                    # Operation options are:
-                    # - 'smaller than': requires Value1
-                    # - 'greater than': requires Value1
-                    # - 'equal to': requires Value1
-                    # - 'inside range': requires Value1 and Value2
-                    # - 'outside range': requires Value1 and Value2
-                }
-            },
-            "objectives": {
-                "y": {
-                    "Operation": 'minimize'
-                    # Operation options are:
-                    # - 'minimize'
-                    # - 'maximize'
-                },
-            }
-        }
+        results = solverAiClientCompute.runSolver(input)
 
-        results = solverAiClientCompute.runSolver(input_json)
-
-        if 'Number Of Results' not in results \
-                or results['Number Of Results'] < 1:
+        if results.get_number_of_results() < 1:
             raise Exception('Results not as expected.')
-
-        # results should have value similar to
-        #     {
-        #         'Number Of Results': 1,
-        #         'Objective Variable Names':
-        #         "['y']",
-        #         'F0': '[0.9999999999999996]',
-        #         'Constraint Variable Names ': "['y']",
-        #         'G0': '[0.9999999999999996]',
-        #         'Input Variable Names': "['x']",
-        #         'X0': '[0.9999999999999996]',
-        #         'Output Variable Names': "['y']",
-        #         'Y0': '[0.9999999999999996]'
-        #     }
 
         solverAiClientSetup.patchEquation(
             equation_ids[0],
@@ -103,15 +58,11 @@ def main():
             variablesString='x1'
         )
 
-        problem_setup_json = solverAiClientCompute.getProblemSetup()
+        inputs, outputs = solverAiClientCompute.getProblemSetup()
 
-        expected_problem_setup_json = {
-            'id': problem_id,
-            'inputs': ['x1'],
-            'outputs': ['y1']
-        }
-
-        assert problem_setup_json == expected_problem_setup_json
+        if inputs != ['x1'] or outputs != ['y1']:
+            raise \
+                Exception("Problem Setup JSON does not match expected value.")
 
         print('Test was successful!!!')
 
