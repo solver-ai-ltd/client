@@ -43,13 +43,13 @@ def main():
                 Exception("Problem Setup JSON does not match expected value.")
 
         input = SolverAiComputeInput(problem_id)
-        input.add_input('x', -2, 2, False, False)
-        input.add_constraint('y', CONSTRAINT.GREATER_THAN, 1)
-        input.add_objective('y', OBJECTIVE.MINIMIZE)
+        input.addInput('x', -2, 2, False, False)
+        input.addConstraint('y', CONSTRAINT.GREATER_THAN, 1)
+        input.addObjective('y', OBJECTIVE.MINIMIZE)
 
         results = solverAiClientCompute.runSolver(input)
 
-        if results.get_number_of_results() < 1:
+        if results.getNumberOfResults() < 1:
             raise Exception('Results not as expected.')
 
         solverAiClientSetup.patchEquation(

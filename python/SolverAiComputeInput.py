@@ -22,7 +22,7 @@ class SolverAiComputeInput:
         self.constraints = {}
         self.objectives = {}
 
-    def add_input(self, name, Min, Max, is_constant, is_integer):
+    def addInput(self, name, Min, Max, is_constant, is_integer):
         self.inputs[name] = {
             'Min': Min,
             'Max': Max,
@@ -30,18 +30,18 @@ class SolverAiComputeInput:
             'Integer': is_integer
         }
 
-    def add_constraint(self, name, operation, value1, value2=0):
+    def addConstraint(self, name, operation, value1, value2=0):
         self.constraints[name] = {
             'Operation': operation.value,
             'Value1': value1,
             'Value2': value2
         }
 
-    def add_objective(self, name, operation):
+    def addObjective(self, name, operation):
         self.objectives[name] = {
             'Operation': operation.value}
 
-    def get_json(self):
+    def getJson(self):
         return dumps({
             'id': self.problem_id,
             'inputs': self.inputs,

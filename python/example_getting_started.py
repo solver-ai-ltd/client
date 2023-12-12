@@ -84,12 +84,12 @@ def main():
         inputs, outputs = solverAiClientCompute.getProblemSetup()
 
         input = SolverAiComputeInput(problem_id)
-        input.add_objective('range', OBJECTIVE.MAXIMIZE)
-        input.add_objective('total_cost', OBJECTIVE.MINIMIZE)
+        input.addObjective('range', OBJECTIVE.MAXIMIZE)
+        input.addObjective('total_cost', OBJECTIVE.MINIMIZE)
 
         results = solverAiClientCompute.runSolver(input)
 
-        if results.get_number_of_results() < 1:
+        if results.getNumberOfResults() < 1:
             raise Exception('Results not as expected.')
 
         solverAiClientSetup.patchEquation(
@@ -105,14 +105,14 @@ def main():
         )
 
         input = SolverAiComputeInput(problem_id)
-        input.add_input('battery_num', 1, 3, False, True)
-        input.add_constraint('range', CONSTRAINT.GREATER_THAN, 200000)
-        input.add_objective('range', OBJECTIVE.MAXIMIZE)
-        input.add_objective('total_cost', OBJECTIVE.MINIMIZE)
+        input.addInput('battery_num', 1, 3, False, True)
+        input.addConstraint('range', CONSTRAINT.GREATER_THAN, 200000)
+        input.addObjective('range', OBJECTIVE.MAXIMIZE)
+        input.addObjective('total_cost', OBJECTIVE.MINIMIZE)
 
         results = solverAiClientCompute.runSolver(input)
 
-        if results.get_number_of_results() < 1:
+        if results.getNumberOfResults() < 1:
             raise Exception('Results not as expected.')
 
         print('Test was successful!!!')

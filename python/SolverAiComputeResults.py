@@ -15,23 +15,23 @@ class SolverAiComputeResults:
         self.Y = [literal_eval(j["Y" + str(i)])
                   for i in range(self.numberOfResults)]
 
-    def get_number_of_results(self):
+    def getNumberOfResults(self):
         return self.numberOfResults
 
-    def get_objective_variable_names(self):
+    def getObjectiveVariableNames(self):
         return self.objectiveVariableNames
 
-    def get_constraint_variable_names(self):
+    def getConstraintVariableNames(self):
         return self.constraintVariableNames
 
-    def get_input_variable_names(self):
+    def getInputVariableNames(self):
         return self.inputVariableNames
 
-    def get_output_variable_names(self):
+    def getOutputVariableNames(self):
         return self.outputVariableNames
 
-    def get_X(self):
+    def getX(self):
         return self.X
 
-    def get_Y(self):
+    def getY(self):
         return self.Y

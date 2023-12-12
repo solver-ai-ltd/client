@@ -37,7 +37,7 @@ class SolverAiClientCompute:
         headers = self.__headers.copy()
         headers["Content-Type"] = "application/json"
         url = f'{self.__base_url_Computer}solvejson/'
-        jsonData = input.get_json()
+        jsonData = input.getJson()
         response = requests.post(url, headers=headers, data=jsonData)
         if self.__isStatusCodeOk(response):
             try:
