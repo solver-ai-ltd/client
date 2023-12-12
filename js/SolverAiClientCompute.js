@@ -1,5 +1,7 @@
 const axios = require('axios');
 
+const SolverAiComputeResults = require('./SolverAiComputeResults');
+
 
 class SolverAiClientCompute {
 
@@ -22,7 +24,7 @@ class SolverAiClientCompute {
             const response = await axios.get(url, { headers: this.__headers });
             
             if (this.constructor.__isStatusCodeOk(response.status)) {
-                return response.data;
+                return [response.data['inputs'], response.data['outputs']];
             } else {
                 throw new Error(`Failed with code: ${response.data}`);
             }
@@ -31,13 +33,14 @@ class SolverAiClientCompute {
         }
     }
 
-    async runSolver(inputJson) {
+    async runSolver(input) {
+        let inputJson = input.getJson();
         try {
             const url = `${this.__base_url_Computer}solvejson/`;
             const response = await axios.post(url, inputJson, { headers: this.__headers });
             
             if (this.constructor.__isStatusCodeOk(response.status)) {
-                return response.data.results;
+                return new SolverAiComputeResults(response.data.results)
             } else {
                 throw new Error(`Failed with code: ${response.data}`);
             }

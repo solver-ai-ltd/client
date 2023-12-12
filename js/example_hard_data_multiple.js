@@ -1,3 +1,4 @@
+const {SolverAiComputeInput, CONSTRAINT, OBJECTIVE} = require('./SolverAiComputeInput');
 const SolverAiClientSetup = require('./SolverAiClientSetup');
 const SolverAiClientCompute = require('./SolverAiClientCompute');
 
@@ -46,54 +47,23 @@ async function main() {
 
         const solverAiClientCompute = new SolverAiClientCompute(config.computerUrl, config.token, problem_id);
 
-        const problemSetupJson = await solverAiClientCompute.getProblemSetup();
+        let [inputs, outputs] = await solverAiClientCompute.getProblemSetup();
 
-        const expectedProblemSetupJson = {
-            id: problem_id,
-            inputs: [],
-            outputs: ['C1', 'T1', 'T2', 'T3']
-        };
-
-        if (JSON.stringify(problemSetupJson) !== JSON.stringify(expectedProblemSetupJson)) {
+        if (JSON.stringify(inputs) !== JSON.stringify([]) || 
+            JSON.stringify(outputs) !== JSON.stringify(['C1', 'T1', 'T2', 'T3']))
+        {
             throw new Error('Problem Setup JSON does not match expected value.');
         }
 
-        const inputJson = {
-            id: problem_id,
-            inputs: {
-            },
-            constraints: {
-            },
-            objectives: {
-                T3: {
-                    Operation: 'minimize'
-                    // Operation options are:
-                    // - 'minimize'
-                    // - 'maximize'
-                },
-            }
-        };
+        let input = new SolverAiComputeInput(problem_id);
+        input.addObjective("T3", OBJECTIVE.MINIMIZE);
 
-        const results = await solverAiClientCompute.runSolver(inputJson);
+        const results = await solverAiClientCompute.runSolver(input);
 
-        if (!results.hasOwnProperty('Number Of Results') || results['Number Of Results'] < 1) {
+        if (results.getNumberOfResults() < 1) {
             throw new Error('Results not as expected.');
         }
         
-        // results should have value similar to
-        // {
-        //     'Number Of Results': 1,
-        //     'Objective Variable Names': "['T3']",
-        //     'F0': '[3.1]',
-        //     'Constraint Variable Names ': "[]",
-        //     'G0': '[]',
-        //     'Input Variable Names': "[]",
-        //     'X0': '[]',
-        //     'Output Variable Names':
-        //         "['C1', 'T1', 'T2', 'T3', 'var1', 'var2', 'var3']",
-        //     'Y0': "[4.1, 1.2, 2.2, 3.1, 'B', 'H', 'P']"
-        // };
-
         console.log('Test was successful!!!');
 
         exitCode = 0;

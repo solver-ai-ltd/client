@@ -1,3 +1,4 @@
+const {SolverAiComputeInput, CONSTRAINT, OBJECTIVE} = require('./SolverAiComputeInput');
 const SolverAiClientSetup = require('./SolverAiClientSetup');
 const SolverAiClientCompute = require('./SolverAiClientCompute');
 
@@ -36,81 +37,26 @@ async function main() {
 
         const solverAiClientCompute = new SolverAiClientCompute(config.computerUrl, config.token, problem_id);
 
-        let problemSetupJson = await solverAiClientCompute.getProblemSetup();
+        let [inputs, outputs] = await solverAiClientCompute.getProblemSetup();
 
-        let expectedProblemSetupJson = {
-            id: problem_id,
-            inputs: ['x1', 'x2'],
-            outputs: ['y1', 'y2']
-        };
-
-        if (JSON.stringify(problemSetupJson) !== JSON.stringify(expectedProblemSetupJson)) {
+        if (JSON.stringify(inputs) !== JSON.stringify(['x1', 'x2']) || 
+            JSON.stringify(outputs) !== JSON.stringify(['y1', 'y2']))
+        {
             throw new Error('Problem Setup JSON does not match expected value.');
         }
 
-        const inputJson = {
-            id: problem_id,
-            inputs: {
-                x1: {
-                    Min: "-2",
-                    Max: "2",
-                    Constant: 0,
-                    Integer: 0
-                },
-                x2: {
-                    Min: "-2",
-                    Max: "2",
-                    Constant: 0,
-                    Integer: 0
-                }
-            },
-            constraints: {
-                y1: {
-                    Operation: 'greater than',
-                    Value1: "1",
-                    Value2: ""
-                    // Operation options are:
-                    // - 'smaller than': requires Value1
-                    // - 'greater than': requires Value1
-                    // - 'equal to': requires Value1
-                    // - 'inside range': requires Value1 and Value2
-                    // - 'outside range': requires Value1 and Value2
-                },
-            },
-            objectives: {
-                y1: {
-                    Operation: 'minimize'
-                    // Operation options are:
-                    // - 'minimize'
-                    // - 'maximize'
-                },
-                y2: {
-                    Operation: 'maximize'
-                    // Operation options are:
-                    // - 'minimize'
-                    // - 'maximize'
-                },
-            }
-        };
+        let input = new SolverAiComputeInput(problem_id);
+        input.addInput('x1', -2, 2, false, false);
+        input.addInput('x2', -2, 2, false, false);
+        input.addConstraint('y1', CONSTRAINT.GREATER_THAN, 1);
+        input.addObjective('y1', OBJECTIVE.MINIMIZE);
+        input.addObjective('y2', OBJECTIVE.MAXIMIZE);
 
-        const results = await solverAiClientCompute.runSolver(inputJson);
+        const results = await solverAiClientCompute.runSolver(input);
 
-        if (!results.hasOwnProperty('Number Of Results') || results['Number Of Results'] < 1) {
+        if (results.getNumberOfResults() < 1) {
             throw new Error('Results not as expected.');
         }
-        
-        // results should have value similar to
-        // {
-        //     'Number Of Results': 1,
-        //     'Objective Variable Names': "['y1', 'y2']",
-        //     'F0': '[1.0000000000000004, 2.0]',
-        //     'Constraint Variable Names ': "['y1']",
-        //     'G0': '[1.0000000000000004]',
-        //     'Input Variable Names': "['x1', 'x2']",
-        //     'X0': '[1.0000000000000004, 2.0]',
-        //     'Output Variable Names': "['y1', 'y2']",
-        //     'Y0': '[1.0000000000000004, 2.0]'
-        // };
 
         await solverAiClientSetup.patchCode(
             code_ids[0],
@@ -118,17 +64,13 @@ async function main() {
             `${config.data_file_folder_path}/code_basic_mod.py`,
             undefined,
             'y1_mod, y2_mod'
-        )
+        );
 
-        problemSetupJson = await solverAiClientCompute.getProblemSetup();
+        [inputs, outputs] = await solverAiClientCompute.getProblemSetup();
 
-        expectedProblemSetupJson = {
-            id: problem_id,
-            inputs: ['x1', 'x2'],
-            outputs: ['y1_mod', 'y2_mod']
-        };
-
-        if (JSON.stringify(problemSetupJson) !== JSON.stringify(expectedProblemSetupJson)) {
+        if (JSON.stringify(inputs) !== JSON.stringify(['x1', 'x2']) || 
+            JSON.stringify(outputs) !== JSON.stringify(['y1_mod', 'y2_mod']))
+        {
             throw new Error('Problem Setup JSON does not match expected value.');
         }
 

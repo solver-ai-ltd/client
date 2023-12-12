@@ -1,3 +1,4 @@
+const {SolverAiComputeInput, CONSTRAINT, OBJECTIVE} = require('./SolverAiComputeInput');
 const SolverAiClientSetup = require('./SolverAiClientSetup');
 const SolverAiClientCompute = require('./SolverAiClientCompute');
 
@@ -34,52 +35,22 @@ async function main() {
 
         const solverAiClientCompute = new SolverAiClientCompute(config.computerUrl, config.token, problem_id);
 
-        const problemSetupJson = await solverAiClientCompute.getProblemSetup();
+        let [inputs, outputs] = await solverAiClientCompute.getProblemSetup();
 
-        const expectedProblemSetupJson = {
-            id: problem_id,
-            inputs: [],
-            outputs: ['C1', 'T1']
-        };
-
-        if (JSON.stringify(problemSetupJson) !== JSON.stringify(expectedProblemSetupJson)) {
+        if (JSON.stringify(inputs) !== JSON.stringify([]) || 
+            JSON.stringify(outputs) !== JSON.stringify(['C1', 'T1']))
+        {
             throw new Error('Problem Setup JSON does not match expected value.');
         }
 
-        const inputJson = {
-            id: problem_id,
-            inputs: {
-            },
-            constraints: {
-            },
-            objectives: {
-                T1: {
-                    Operation: 'minimize'
-                    // Operation options are:
-                    // - 'minimize'
-                    // - 'maximize'
-                },
-            }
-        };
+        let input = new SolverAiComputeInput(problem_id);
+        input.addObjective('T1', OBJECTIVE.MINIMIZE)
 
-        let results = await solverAiClientCompute.runSolver(inputJson);
+        let results = await solverAiClientCompute.runSolver(input);
 
-        if (!results.hasOwnProperty('Number Of Results') || results['Number Of Results'] < 1) {
+        if (results.getNumberOfResults() < 1) {
             throw new Error('Results not as expected.');
         }
-        
-        // results should have value similar to
-        // {
-        //     'Number Of Results': 1,
-        //     'Objective Variable Names': "['T1']",
-        //     'F0': '[1.0]',
-        //     'Constraint Variable Names ': "[]",
-        //     'G0': '[]',
-        //     'Input Variable Names': "[]",
-        //     'X0': '[]',
-        //     'Output Variable Names': "['C1', 'T1', 'var1', 'var2']",
-        //     'Y0': "[4.1, 1.0, 'A', 'G']"
-        // };
 
         solverAiClientSetup.patchHardData(
             id,
@@ -88,25 +59,12 @@ async function main() {
             undefined
         )
 
-        results = await solverAiClientCompute.runSolver(inputJson);
+        results = await solverAiClientCompute.runSolver(input);
 
-        if (!results.hasOwnProperty('Number Of Results') || results['Number Of Results'] < 1) {
+        if (results.getNumberOfResults() < 1) {
             throw new Error('Results not as expected.');
         }
         
-        // results should have value similar to
-        // {
-        //     'Number Of Results': 1,
-        //     'Objective Variable Names': "['T1']",
-        //     'F0': '[1.2]',
-        //     'Constraint Variable Names ': "[]",
-        //     'G0': '[]',
-        //     'Input Variable Names': "[]",
-        //     'X0': '[]',
-        //     'Output Variable Names': "['C1', 'T1', 'var1', 'var2']",
-        //     'Y0': "[4.1, 1.2, 'B', 'H']"
-        // };
-
         console.log('Test was successful!!!');
 
         exitCode = 0;
