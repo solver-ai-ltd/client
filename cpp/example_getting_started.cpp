@@ -126,19 +126,6 @@ int main() {
             throw std::runtime_error("Results not as expected.");
         }
 
-        // results should have value similar to
-        // {
-        //     {"Number Of Results", 1},
-        //     {"Objective Variable Names", "['T1']"},
-        //     {"F0", "[1.2]"},
-        //     {"Constraint Variable Names ", "[]"},
-        //     {"G0", "[]"},
-        //     {"Input Variable Names", "[]"},
-        //     {"X0", "[]"},
-        //     {"Output Variable Names", "['C1', 'T1', 'var1', 'var2']"},
-        //     {"Y0", "[4.1, 1.2, 'B', 'H']"}
-        // };
-
         std::cout << "Test was successful!!!" << std::endl;
 
         solverAiClientSetup.deleteAll(equation_ids, code_ids, hard_data_ids, soft_data_ids, problem_id);
