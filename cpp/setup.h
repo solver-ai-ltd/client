@@ -4,11 +4,11 @@
 #include <map>
 
 const std::string data_file_folder_path = std::filesystem::absolute(std::filesystem::path(__FILE__).parent_path() / ".." / "example_files").string();
+const std::string setupFilePath = std::filesystem::absolute(std::filesystem::path(__FILE__).parent_path() / ".." / "setup/setup.txt").string();
 
 std::map<std::string, std::string>
-readSetupFile(std::string data_file_folder_path)
+readSetupFile()
 {
-    const std::string setupFilePath = data_file_folder_path + "/setup.txt";
     std::map<std::string, std::string> config;
     std::ifstream file(setupFilePath);
     std::string line;

@@ -20,6 +20,6 @@ The client folder contains the following sub-folders:
 The `python`, `js`, and `cpp` folders contain examples demonstrating how to use the `SolverAiClientSetup` and `SolverAiClientCompute` classes.
 
 ## Prerequisites
-To use the Solver-AI API, you need to obtain a token from the Account section of the website and save it in the `setup.txt` file in the `example_files` folder.
+To use the Solver-AI API, you need to obtain a token from the Account section of the website and save it in the `setup.txt` file in the `setup` folder.
 
 For more details, please visit the [Solver-AI website](https://www.solver-ai.com/documentation/doku.php). Happy coding! 😊

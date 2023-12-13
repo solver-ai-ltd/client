@@ -189,6 +189,41 @@ void SolverAiClientSetup::deleteAll(
     }
 }
 
+std::string SolverAiClientSetup::deleteEquation(int id)
+{
+    std::string error;
+    deleteIds(this->__equationSuffix, {id}, error);
+    return error;
+}
+
+std::string SolverAiClientSetup::deleteCode(int id)
+{
+    std::string error;
+    deleteIds(this->__codeSuffix, {id}, error);
+    return error;
+}
+
+std::string SolverAiClientSetup::deleteHardData(int id)
+{
+    std::string error;
+    deleteIds(this->__hardDataSuffix, {id}, error);
+    return error;
+}
+
+std::string SolverAiClientSetup::deleteSoftData(int id)
+{
+    std::string error;
+    deleteIds(this->__softDataSuffix, {id}, error);
+    return error;
+}
+
+std::string SolverAiClientSetup::deleteProblem(int id)
+{
+    std::string error;
+    deleteIds(this->__problemSuffix, {id}, error);
+    return error;
+}
+
 void SolverAiClientSetup::deleteIds(std::string urlSuffix, std::vector<int> ids, std::string &errors)
 {
     CURL *curl;

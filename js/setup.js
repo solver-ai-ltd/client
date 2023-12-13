@@ -2,7 +2,8 @@ const fs = require('fs');
 const path = require('path');
 
 const data_file_folder_path = path.resolve(__dirname, '..', 'example_files');
-const setupFilePath = path.join(data_file_folder_path, 'setup.txt');
+const setupFolder = path.resolve(__dirname, '..', 'setup');
+const setupFilePath = path.join(setupFolder, 'setup.txt');
 
 // read file synchronously
 const data = fs.readFileSync(setupFilePath, 'utf8');

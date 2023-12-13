@@ -90,14 +90,34 @@ class SolverAiClientSetup:
         if len(errors):
             raise Exception(errors)
 
+    def __deleteId(self, urlSuffix: str, id: int) -> str:
+        error = ''
+        url = f'{self.__base_url_DM}{urlSuffix}/{id}'
+        response = requests.delete(url, headers=self.__headers)
+        if not self.__isStatusCodeOk(response):
+            error = f'Failed Deleting: {url}\n'
+        return error
+
     def __deleteIds(self, urlSuffix: str, ids: list) -> None:
         errors = ''
         for id in ids:
-            url = f'{self.__base_url_DM}{urlSuffix}/{id}'
-            response = requests.delete(url, headers=self.__headers)
-            if not self.__isStatusCodeOk(response):
-                errors = f'Failed Deleting: {url}\n'
+            errors += self.__deleteId(urlSuffix, id)
         return errors
+
+    def deleteEquation(self, id: int):
+        return self.__deleteId(self.__equationSuffix, id)
+
+    def deleteCode(self, id: int):
+        return self.__deleteId(self.__codeSuffix, id)
+
+    def deleteHardData(self, id: int):
+        return self.__deleteId(self.__hardDataSuffix, id)
+
+    def deleteSoftData(self, id: int):
+        return self.__deleteId(self.__softDataSuffix, id)
+
+    def deleteProblem(self, id: int):
+        return self.__deleteId(self.__problemSuffix, id)
 
     def postEquation(
         self,

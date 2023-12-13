@@ -13,7 +13,7 @@
 #include "setup.h"
 
 int main() {
-    std::map<std::string, std::string> config = readSetupFile(data_file_folder_path);
+    std::map<std::string, std::string> config = readSetupFile();
     const std::string datamanagerUrl = config["datamanagerUrl"];
     const std::string computerUrl = config["computerUrl"];
     const std::string token = config["token"];

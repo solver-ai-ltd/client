@@ -3,7 +3,9 @@ from os import path
 
 data_file_folder_path = path.join(path.dirname(path.abspath(__file__)),
                                   '..', 'example_files')
-setupFilePath = path.join(data_file_folder_path, 'setup.txt')
+setupFolder = path.join(path.dirname(path.abspath(__file__)),
+                        '..', 'setup')
+setupFilePath = path.join(setupFolder, 'setup.txt')
 
 with open(setupFilePath, 'r') as f:
     lines = f.readlines()

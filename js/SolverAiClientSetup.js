@@ -90,17 +90,43 @@ class SolverAiClientSetup {
         }
     }
 
+    async __deleteId(urlSuffix, id) {
+        var error = '';
+        const url = `${this.__base_url_DM}${urlSuffix}/${id}`;
+        try {
+            await axios.delete(url, { headers: this.__headers });
+        } catch (error) {
+            error = `Failed Deleting: ${error.message}\n`;
+        }
+        return error;
+    }
+
     async __deleteIds(urlSuffix, ids) {
         var errors = '';
         for (const id of ids) {
-            const url = `${this.__base_url_DM}${urlSuffix}/${id}`;
-            try {
-                await axios.delete(url, { headers: this.__headers });
-            } catch (error) {
-                errors += `Failed Deleting: ${error.message}\n`;
-            }
+            errors += await this.__deleteId(urlSuffix, id);
         }
         return errors;
+    }
+
+    async deleteEquation(id) {
+        return self.__deleteId(this.__equationSuffix, id);
+    }
+
+    async deleteCode(id) {
+        return self.__deleteId(this.__codeSuffix, id);
+    }
+
+    async deleteHardData(id) {
+        return self.__deleteId(this.__hardDataSuffix, id);
+    }
+
+    async deleteSoftData(id) {
+        return self.__deleteId(this.__softDataSuffix, id);
+    }
+
+    async deleteProblem(id) {
+        return self.__deleteId(this.__problemSuffix, id);
     }
 
     async postEquation(

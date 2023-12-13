@@ -11,13 +11,6 @@ class SolverAiClientSetup
 public:
     SolverAiClientSetup(std::string datamanagerUrl, std::string token);
 
-    void deleteAll(
-        std::vector<int> equationIds = {},
-        std::vector<int> codeIds = {},
-        std::vector<int> hardIds = {},
-        std::vector<int> softIds = {},
-        int problemId = -1);
-
     int postEquation(
         std::string name,
         std::string equationString,
@@ -86,6 +79,23 @@ public:
         std::vector<int> codeIds = {},
         std::vector<int> hardIds = {},
         std::vector<int> softIds = {});
+
+    std::string deleteEquation(int id);
+
+    std::string deleteCode(int id);
+
+    std::string deleteHardData(int id);
+
+    std::string deleteSoftData(int id);
+
+    std::string deleteProblem(int id);
+
+    void deleteAll(
+        std::vector<int> equationIds = {},
+        std::vector<int> codeIds = {},
+        std::vector<int> hardIds = {},
+        std::vector<int> softIds = {},
+        int problemId = -1);
 
     static size_t writeCallback(void *contents, size_t size, size_t nmemb, std::string *userp);
 
