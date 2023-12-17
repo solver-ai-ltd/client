@@ -25,6 +25,7 @@ public:
 
     SolverAiComputeInput(int problem_id);
 
+    void setSolverSetup(bool includeLeastInfeasible = false, int solutionQuality = 1);
     void addInput(const std::string &name, float Min, float Max, bool isConstant, bool isInteger);
     void addConstraint(const std::string &name, CONSTRAINT operation, float Value1, float Value2 = 0);
     void addObjective(const std::string &name, OBJECTIVE operation);
@@ -32,6 +33,7 @@ public:
 
 private:
     int problem_id;
+    nlohmann::json solverSetup;
     std::map<std::string, nlohmann::json> inputs;
     std::map<std::string, nlohmann::json> constraints;
     std::map<std::string, nlohmann::json> objectives;

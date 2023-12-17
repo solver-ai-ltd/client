@@ -12,11 +12,21 @@ const OBJECTIVE = {
 };
 
 class SolverAiComputeInput {
+
     constructor(problem_id) {
         this.problem_id = problem_id;
         this.inputs = {};
         this.constraints = {};
         this.objectives = {};
+
+        this.setSolverSetup();
+    }
+
+    setSolverSetup(includeLeastInfeasible=false, solutionQuality=1) {
+        this.solverSetup = {
+            'includeLeastInfeasible': Number(includeLeastInfeasible),
+            'solutionQuality': solutionQuality
+        }
     }
 
     addInput(name, Min, Max, is_constant, is_integer) {
@@ -51,6 +61,7 @@ class SolverAiComputeInput {
     getJson() {
         return {
             id: this.problem_id,
+            solverSetup: this.solverSetup,
             inputs: this.inputs,
             constraints: this.constraints,
             objectives: this.objectives

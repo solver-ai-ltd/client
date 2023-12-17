@@ -16,13 +16,30 @@ class OBJECTIVE(Enum):
 
 
 class SolverAiComputeInput:
+
     def __init__(self, problem_id):
         self.problem_id = problem_id
         self.inputs = {}
         self.constraints = {}
         self.objectives = {}
 
-    def addInput(self, name, Min, Max, is_constant, is_integer):
+        self.setSolverSetup()
+
+    def setSolverSetup(
+        self,
+        includeLeastInfeasible: bool = False,
+        solutionQuality: int = 1
+    ):
+        self.solverSetup = {
+            'includeLeastInfeasible': int(includeLeastInfeasible),
+            'solutionQuality': solutionQuality
+        }
+
+    def addInput(self,
+                 name, Min, Max=0,
+                 is_constant=False, is_integer=False):
+        if Min == Max:
+            is_constant = True
         self.inputs[name] = {
             'Min': Min,
             'Max': Max,
@@ -44,6 +61,7 @@ class SolverAiComputeInput:
     def getJson(self):
         return dumps({
             'id': self.problem_id,
+            'solverSetup': self.solverSetup,
             'inputs': self.inputs,
             'constraints': self.constraints,
             'objectives': self.objectives

@@ -1,6 +1,17 @@
 #include "SolverAiComputeInput.h"
 
-SolverAiComputeInput::SolverAiComputeInput(int problem_id) : problem_id(problem_id) {}
+SolverAiComputeInput::SolverAiComputeInput(int problem_id) : problem_id(problem_id)
+{
+    setSolverSetup();
+}
+
+void SolverAiComputeInput::setSolverSetup(bool includeLeastInfeasible, int solutionQuality)
+{
+    solverSetup = {
+        {"includeLeastInfeasible", int(includeLeastInfeasible)},
+        {"solutionQuality", solutionQuality}
+    };
+}
 
 void SolverAiComputeInput::addInput(const std::string &name, float Min, float Max, bool isConstant, bool isInteger)
 {
@@ -41,7 +52,9 @@ nlohmann::json SolverAiComputeInput::getJson() const
 {
     return {
         {"id", problem_id},
+        {"solverSetup", solverSetup},
         {"inputs", inputs},
         {"constraints", constraints},
-        {"objectives", objectives}};
+        {"objectives", objectives}
+    };
 }
