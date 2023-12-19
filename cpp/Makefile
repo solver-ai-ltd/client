@@ -18,7 +18,7 @@ COMMON_SRCS = SolverAiClientSetup.cpp SolverAiClientCompute.cpp SolverAiComputeI
 COMMON_OBJS = $(COMMON_SRCS:.cpp=.o)
 
 # Example source files
-EXAMPLE_SRCS := $(wildcard example_*.cpp)
+EXAMPLE_SRCS := $(wildcard example_*.cpp) delete_everything.cpp
 
 # Executable names for example source files
 EXAMPLE_EXECS = $(EXAMPLE_SRCS:.cpp=)
