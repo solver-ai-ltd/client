@@ -90,6 +90,16 @@ public:
 
     std::string deleteProblem(int id);
 
+    std::string deleteEquations(std::string nameRegex = ".*");
+
+    std::string deleteCodes(std::string nameRegex = ".*");
+
+    std::string deleteHardDatas(std::string nameRegex = ".*");
+
+    std::string deleteSoftDatas(std::string nameRegex = ".*");
+
+    std::string deleteProblems(std::string nameRegex = ".*");
+
     void deleteAll(
         std::vector<int> equationIds = {},
         std::vector<int> codeIds = {},
@@ -97,7 +107,12 @@ public:
         std::vector<int> softIds = {},
         int problemId = -1);
 
-    static size_t writeCallback(void *contents, size_t size, size_t nmemb, std::string *userp);
+    static size_t writeCallback(
+        void *contents,
+        size_t size,
+        size_t nmemb,
+        std::string *userp
+    );
 
 private:
     bool isStatusCodeOk(int statusCode);
@@ -109,9 +124,18 @@ private:
         std::string fileKey = "",
         int id = -1);
 
+    std::vector<int> getIds(
+        std::string urlSuffix,
+        std::string nameRegex);
+
     void deleteIds(
         std::string urlSuffix,
         std::vector<int> ids,
+        std::string &errors);
+
+    void deleteModules(
+        std::string urlSuffix,
+        std::string nameRegex,
         std::string &errors);
 
     std::string __base_url_DM;

@@ -65,6 +65,20 @@ class SolverAiClientSetup {
         }
     }
 
+    async __getIds(urlSuffix, nameRegex) {
+        const url = `${this.__base_url_DM}${urlSuffix}/`;
+        const response = await axios.get(url, { headers: this.__headers });
+        const data = response.data;
+        let ids = data.map(module => {
+            if (new RegExp(nameRegex).test(module['name'])) {
+                return module['id'];
+            }
+            return null;
+        });
+        ids = ids.filter(id => id !== null);
+        return ids;
+    }
+
     async deleteAll(
         equationIds = [],
         codeIds = [],
@@ -109,6 +123,11 @@ class SolverAiClientSetup {
         return errors;
     }
 
+    async __deleteModules(urlSuffix, nameRegex) {
+        const ids = await this.__getIds(urlSuffix, nameRegex);
+        return this.__deleteIds(urlSuffix, ids);
+    }
+    
     async deleteEquation(id) {
         return self.__deleteId(this.__equationSuffix, id);
     }
@@ -127,6 +146,26 @@ class SolverAiClientSetup {
 
     async deleteProblem(id) {
         return self.__deleteId(this.__problemSuffix, id);
+    }
+
+    async deleteEquations(nameRegex = ".*") {
+        return this.__deleteModules(this.__equationSuffix, nameRegex);
+    }
+    
+    async deleteCodes(nameRegex = ".*") {
+        return this.__deleteModules(this.__codeSuffix, nameRegex);
+    }
+    
+    async deleteHardDatas(nameRegex = ".*") {
+        return this.__deleteModules(this.__hardDataSuffix, nameRegex);
+    }
+    
+    async deleteSoftDatas(nameRegex = ".*") {
+        return this.__deleteModules(this.__softDataSuffix, nameRegex);
+    }
+
+    async deleteProblems(nameRegex = ".*") {
+        return this.__deleteModules(this.__problemSuffix, nameRegex);
     }
 
     async postEquation(

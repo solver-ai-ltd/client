@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <regex>
 
 #include <curl/curl.h>
 
@@ -153,6 +154,50 @@ int SolverAiClientSetup::postPatch(
     return id;
 }
 
+std::vector<int> SolverAiClientSetup::getIds(
+    std::string urlSuffix,
+    std::string nameRegex)
+{
+    CURL* curl;
+    CURLcode res;
+    std::string readBuffer;
+
+    curl_global_init(CURL_GLOBAL_DEFAULT);
+    curl = curl_easy_init();
+
+    std::vector<int> ids;
+    if(curl) {
+        std::string url = this->__base_url_DM + urlSuffix + "/";
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+        struct curl_slist *headers = NULL;
+        headers = curl_slist_append(headers, this->__headers.c_str());
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+
+        res = curl_easy_perform(curl);
+
+        if(res != CURLE_OK) {
+            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        } else {
+            nlohmann::json data = nlohmann::json::parse(readBuffer);
+            std::regex namePattern(nameRegex);
+            for (auto& element : data) {
+                if (std::regex_match(element["name"].get<std::string>(), namePattern)) {
+                    ids.push_back(element["id"]);
+                }
+            }
+        }
+
+        curl_easy_cleanup(curl);
+    }
+
+    curl_global_cleanup();
+
+    return ids;
+}
+
 size_t SolverAiClientSetup::writeCallback(void *contents, size_t size, size_t nmemb, std::string *userp)
 {
     ((std::string *)userp)->append((char *)contents, size * nmemb);
@@ -224,8 +269,47 @@ std::string SolverAiClientSetup::deleteProblem(int id)
     return error;
 }
 
+std::string SolverAiClientSetup::deleteEquations(std::string nameRegex)
+{
+    std::string errors;
+    deleteModules(this->__equationSuffix, nameRegex, errors);
+    return errors;
+}
+
+std::string SolverAiClientSetup::deleteCodes(std::string nameRegex)
+{
+    std::string errors;
+    deleteModules(this->__codeSuffix, nameRegex, errors);
+    return errors;
+}
+
+std::string SolverAiClientSetup::deleteHardDatas(std::string nameRegex)
+{
+    std::string errors;
+    deleteModules(this->__hardDataSuffix, nameRegex, errors);
+    return errors;
+}
+
+std::string SolverAiClientSetup::deleteSoftDatas(std::string nameRegex)
+{
+    std::string errors;
+    deleteModules(this->__softDataSuffix, nameRegex, errors);
+    return errors;
+}
+
+std::string SolverAiClientSetup::deleteProblems(std::string nameRegex)
+{
+    std::string errors;
+    deleteModules(this->__problemSuffix, nameRegex, errors);
+    return errors;
+}
+
 void SolverAiClientSetup::deleteIds(std::string urlSuffix, std::vector<int> ids, std::string &errors)
 {
+    if (ids.size() == 0) {
+        return;
+    }
+
     CURL *curl;
     CURLcode res;
     std::string response_string;
@@ -269,6 +353,12 @@ void SolverAiClientSetup::deleteIds(std::string urlSuffix, std::vector<int> ids,
     curl_slist_free_all(header_list);
     curl_easy_cleanup(curl);
     curl_global_cleanup();
+}
+
+void SolverAiClientSetup::deleteModules(std::string urlSuffix, std::string nameRegex, std::string &errors)
+{
+    std::vector<int> ids = getIds(urlSuffix, nameRegex);
+    deleteIds(urlSuffix, ids, errors);
 }
 
 int SolverAiClientSetup::postEquation(

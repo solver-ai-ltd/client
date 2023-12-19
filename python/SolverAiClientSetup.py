@@ -1,5 +1,6 @@
-import requests
-import json
+from requests import get, post, patch, delete
+from json import loads, dumps
+from re import search
 
 
 class SolverAiClientSetup:
@@ -27,10 +28,10 @@ class SolverAiClientSetup:
 
         if isPost:
             url = f'{self.__base_url_DM}{urlSuffix}/'
-            httpFunction = requests.post
+            httpFunction = post
         else:
             url = f'{self.__base_url_DM}{urlSuffix}/{id}/'
-            httpFunction = requests.patch
+            httpFunction = patch
 
         tempData = data.copy()
         if 'vectorizationIndices' in tempData and \
@@ -45,7 +46,7 @@ class SolverAiClientSetup:
         else:  # If no files, convert data to a JSON string
             headers = self.__headers.copy()
             headers["Content-Type"] = "application/json"
-            jsonData = json.dumps(tempData)
+            jsonData = dumps(tempData)
             response = httpFunction(
                 url, headers=headers, data=jsonData
             )
@@ -60,12 +61,30 @@ class SolverAiClientSetup:
     def __processResponse(self, urlSuffix, response):
         if self.__isStatusCodeOk(response):
             try:
-                data = json.loads(response.text)
+                data = loads(response.text)
             except Exception:
                 raise Exception('Failed retrieving data.')
             return data['id']
         else:
-            raise Exception(f'Failed with code: {json.loads(response.text)}.')
+            raise Exception(f'Failed with code: {loads(response.text)}.')
+
+    def __getIds(self, urlSuffix, nameRegex):
+        url = f'{self.__base_url_DM}{urlSuffix}/'
+        headers = self.__headers.copy()
+        response = get(
+            url, headers=headers
+        )
+        try:
+            data = loads(response.text)
+        except Exception:
+            raise Exception('Failed retrieving data.')
+
+        ids = list()
+        for module in data:
+            if search(nameRegex, module['name']):
+                ids.append(module['id'])
+
+        return ids
 
     def deleteAll(
         self,
@@ -93,7 +112,7 @@ class SolverAiClientSetup:
     def __deleteId(self, urlSuffix: str, id: int) -> str:
         error = ''
         url = f'{self.__base_url_DM}{urlSuffix}/{id}'
-        response = requests.delete(url, headers=self.__headers)
+        response = delete(url, headers=self.__headers)
         if not self.__isStatusCodeOk(response):
             error = f'Failed Deleting: {url}\n'
         return error
@@ -103,6 +122,10 @@ class SolverAiClientSetup:
         for id in ids:
             errors += self.__deleteId(urlSuffix, id)
         return errors
+
+    def __deleteModules(self, urlSuffix: str, nameRegex):
+        ids = self.__getIds(urlSuffix, nameRegex)
+        return self.__deleteIds(urlSuffix, ids)
 
     def deleteEquation(self, id: int):
         return self.__deleteId(self.__equationSuffix, id)
@@ -118,6 +141,21 @@ class SolverAiClientSetup:
 
     def deleteProblem(self, id: int):
         return self.__deleteId(self.__problemSuffix, id)
+
+    def deleteEquations(self, nameRegex=".*"):
+        return self.__deleteModules(self.__equationSuffix, nameRegex)
+
+    def deleteCodes(self, nameRegex=".*"):
+        return self.__deleteModules(self.__codeSuffix, nameRegex)
+
+    def deleteHardDatas(self, nameRegex=".*"):
+        return self.__deleteModules(self.__hardDataSuffix, nameRegex)
+
+    def deleteSoftDatas(self, nameRegex=".*"):
+        return self.__deleteModules(self.__softDataSuffix, nameRegex)
+
+    def deleteProblems(self, nameRegex=".*"):
+        return self.__deleteModules(self.__problemSuffix, nameRegex)
 
     def postEquation(
         self,
