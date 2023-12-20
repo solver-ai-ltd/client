@@ -33,9 +33,9 @@ class SolverAiClientCompute {
         }
     }
 
-    async runSolver(input) {
+    async runSolver(solverAiComputeInput) {
         try {
-            let inputJson = input.getJson();
+            let inputJson = solverAiComputeInput.getJson();
             const url = `${this.__base_url_Computer}solvejson/`;
             const response = await axios.post(url, inputJson, { headers: this.__headers });
             
