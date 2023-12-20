@@ -51,14 +51,14 @@ class SolverAiClientSetup:
                 url, headers=headers, data=jsonData
             )
 
-        return self.__processResponse(urlSuffix, response)
+        return self.__processResponse(response)
 
     @staticmethod
     def __isStatusCodeOk(response):
         statusCode = response.status_code
         return 200 <= statusCode and statusCode < 300
 
-    def __processResponse(self, urlSuffix, response):
+    def __processResponse(self, response):
         if self.__isStatusCodeOk(response):
             try:
                 data = loads(response.text)
@@ -68,7 +68,7 @@ class SolverAiClientSetup:
         else:
             raise Exception(f'Failed with code: {loads(response.text)}.')
 
-    def __getIds(self, urlSuffix, nameRegex):
+    def __getIds(self, urlSuffix: str, nameRegex: str):
         url = f'{self.__base_url_DM}{urlSuffix}/'
         headers = self.__headers.copy()
         response = get(
@@ -123,7 +123,7 @@ class SolverAiClientSetup:
             errors += self.__deleteId(urlSuffix, id)
         return errors
 
-    def __deleteModules(self, urlSuffix: str, nameRegex):
+    def __deleteModules(self, urlSuffix: str, nameRegex: str):
         ids = self.__getIds(urlSuffix, nameRegex)
         return self.__deleteIds(urlSuffix, ids)
 
@@ -142,19 +142,19 @@ class SolverAiClientSetup:
     def deleteProblem(self, id: int):
         return self.__deleteId(self.__problemSuffix, id)
 
-    def deleteEquations(self, nameRegex=".*"):
+    def deleteEquations(self, nameRegex: str = ".*"):
         return self.__deleteModules(self.__equationSuffix, nameRegex)
 
-    def deleteCodes(self, nameRegex=".*"):
+    def deleteCodes(self, nameRegex: str = ".*"):
         return self.__deleteModules(self.__codeSuffix, nameRegex)
 
-    def deleteHardDatas(self, nameRegex=".*"):
+    def deleteHardDatas(self, nameRegex: str = ".*"):
         return self.__deleteModules(self.__hardDataSuffix, nameRegex)
 
-    def deleteSoftDatas(self, nameRegex=".*"):
+    def deleteSoftDatas(self, nameRegex: str = ".*"):
         return self.__deleteModules(self.__softDataSuffix, nameRegex)
 
-    def deleteProblems(self, nameRegex=".*"):
+    def deleteProblems(self, nameRegex: str = ".*"):
         return self.__deleteModules(self.__problemSuffix, nameRegex)
 
     def postEquation(
