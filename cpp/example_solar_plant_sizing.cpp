@@ -316,14 +316,6 @@ int main() {
         hard_data_ids.push_back(id);
 
         // Problem setup
-
-
-
-
-
-
-
-
         problem_id = solverAiClientSetup.postProblem(
             "Test Problem",
             equation_ids,
@@ -338,12 +330,6 @@ int main() {
         solverAiClientCompute.getProblemSetup(inputs, outputs);
 
         SolverAiComputeInput input(problem_id);
-
-
-
-
-
-
 
         // ############################
         // Constant parameters
