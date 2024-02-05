@@ -3,7 +3,7 @@
 Welcome to the Solver-AI API! This API provides a set of client classes to facilitate the integration of Python, JavaScript, and C++ with the API. 
 
 ## Version
-This code is compatible with SOLVER-AI verion 2023-8 &alpha; and later
+This code is compatible with SOLVER-AI verion 2024-8 &alpha; and later
 
 ## Structure
 The client folder contains the following sub-folders:
