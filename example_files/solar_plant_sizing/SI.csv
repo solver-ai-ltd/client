@@ -1,0 +1,9 @@
+si_model,si_manufactorer,si_kw,si_max_input_current,si_feed_in_start_v,si_eff_perc,si_number_of_mpp_trackers,si_dc_input_v_range,si_prc
+Model 1,Manufacturer 1,10,41.5,-,97,2,200 - 1000,1501
+Model 2,Manufacturer 1,15,41.5,-,97,2,200 - 1000,1715
+Model 3,Manufacturer 1,20,41.5,-,97.3,2,200 - 1000,1912
+Model 4,Manufacturer 1,25,44.2,650,98.2,1,580 - 1000,2087.26
+Model 5,Manufacturer 1,27,47.7,650,98.3,1,580 - 1000,2143.99
+Model 6,Manufacturer 2,15,33,188,98.4,2,150 - 1000,1978.02
+Model 7,Manufacturer 2,20,33,188,98.4,2,150 - 1000,2129.16
+Model 8,Manufacturer 2,25,33,188,98.4,2,150 - 1000,2154.24

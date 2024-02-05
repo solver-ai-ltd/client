@@ -1,0 +1,8 @@
+ic_model,ic_manufactorer,ic_battery_input_v,ic_w,ic_surge_wh_3sec,ic_prc,ic_n_phss,ic_eff_perc_loss
+Model 1,Manufacturer 1,48,3300,5500,1815.6,3,98
+Model 2,Manufacturer 1,48,4600,12000,2084.88,3,98
+Model 3,Manufacturer 1,48,6000,15000,2286.16,3,98
+Model 4,Manufacturer 2,48,4000,10000,1440,3,98
+Model 5,Manufacturer 2,48,6500,16000,1954.2,3,98
+Model 6,Manufacturer 2,48,8000,20000,2334.6,3,98
+Model 7,Manufacturer 2,48,12000,25000,3067.2,3,98

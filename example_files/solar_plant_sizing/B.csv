@@ -1,0 +1,8 @@
+b_model,b_manufacturer,b_prc,b_kwh,b_max_expansion_kwh,b_continuous_output_ah,b_v,b_eff_perc_loss
+Model 1,Manufacturer 1,1885.64,4,256,65,48,98
+Model 2,Manufacturer 1,3344.24,8,256,130,48,98
+Model 3,Manufacturer 1,4802.84,12,256,195,48,98
+Model 4,Manufacturer 2,6261.44,16,256,250,48,98
+Model 5,Manufacturer 2,7720.04,20,20,250,48,98
+Model 6,Manufacturer 2,9178.64,24,24,250,48,98
+Model 7,Manufacturer 3,5432.52,15.36,983,250,48,98

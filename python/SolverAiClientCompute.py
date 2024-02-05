@@ -43,7 +43,7 @@ class SolverAiClientCompute:
             try:
                 data = json.loads(response.text)
             except Exception:
-                return Exception('Failed retrieving data.')
+                raise Exception('Failed retrieving data.')
             return SolverAiComputeResults(data['results'])
         else:
-            return Exception(f'Failed with code: {json.loads(response.text)}.')
+            raise Exception(f'{json.loads(response.text)}.')

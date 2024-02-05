@@ -1,0 +1,4 @@
+sp_model,si_manufactorer,sp_w,sp_product_warranty_years,sp_cell_type,sp_cell_number,sp_dth_m,sp_wth_m,sp_area_m2,sp_voc,sp_vdc,sp_prc,sp_eff_perc
+Model 1,Manufacturer 1,545,12,mono,144,2.281,1.136,2.591216,49.75,1500,179,21.1
+Model 2,Manufacturer 1,400,15,mono,108,1.722,1.133,1.951026,37.1,1500,168,20.5
+Model 3,Manufacturer 1,650,12,mono,132,2.384,1.303,3.106352,45.3,1500,214.5,20.09
